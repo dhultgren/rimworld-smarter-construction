@@ -1,1 +1,1 @@
-Rimworld mod, published on Steam workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=2201783516
+Rimworld mod, published on Steam workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=2202185773
