@@ -4,6 +4,7 @@ using Verse;
 
 namespace SmarterConstruction.Patches
 {
+    // Tell Rimworld that construction work givers should look at priority
     [HarmonyPatch(typeof(WorkGiver_Scanner))]
     [HarmonyPatch("Prioritized", MethodType.Getter)]
     public class Patch_WorkGiver_Scanner_Prioritized

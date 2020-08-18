@@ -6,6 +6,7 @@ using Verse.AI;
 
 namespace SmarterConstruction.Patches
 {
+    // Pretend job doesn't exist if the building would enclose something
     [HarmonyPatch(typeof(WorkGiver_ConstructFinishFrames), "JobOnThing")]
     public class WorkGiver_ConstructFinishFrames_JobOnThing
     {

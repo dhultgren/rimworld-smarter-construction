@@ -55,7 +55,7 @@ namespace SmarterConstruction.Pathfinding
             var neighbors = GetCardinalNeighbors(addedBlocker);
             var closedRegion = new HashSet<IntVec3>();
             var curRegion = new HashSet<IntVec3>();
-            foreach(var pos in neighbors)
+            foreach (var pos in neighbors)
             {
                 if (curRegion.Contains(pos)) continue;
                 curRegion = FloodFill(pathGrid, pos, addedBlocker);
@@ -67,14 +67,6 @@ namespace SmarterConstruction.Pathfinding
             return closedRegion;
         }
 
-        public static HashSet<IntVec3> FindClosedRegion(IPathGrid pathGrid, IntVec3 start, IntVec3 addedBlocker)
-        {
-            var region = FloodFill(pathGrid, start, addedBlocker);
-            return region.Count >= MaxRegionSize ? new HashSet<IntVec3>() : region;
-        }
-
-        private static int fills = 0;
-
         private static HashSet<IntVec3> FloodFill(IPathGrid pathGrid, IntVec3 start, IntVec3 addedBlocker)
         {
             var region = new HashSet<IntVec3>();
@@ -82,7 +74,6 @@ namespace SmarterConstruction.Pathfinding
 
             var queuedPositions = new Queue<IntVec3>();
             queuedPositions.Enqueue(start);
-            if (++fills % 100 == 0) Log.Message("Floodfill #" + fills);
             while (queuedPositions.Count > 0)
             {
                 if (region.Count >= MaxRegionSize) break;

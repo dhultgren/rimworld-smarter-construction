@@ -6,7 +6,7 @@ using Verse;
 
 namespace SmarterConstruction.Patches
 {
-    //Set priority based on how many blocking neighbors the thing has
+    // Set priority based on how many blocking neighbors the thing has
     [HarmonyPatch(typeof(WorkGiver_Scanner), "GetPriority", new Type[] { typeof(Pawn), typeof(TargetInfo) })]
     public class Patch_WorkGiver_Scanner_GetPriority
     {

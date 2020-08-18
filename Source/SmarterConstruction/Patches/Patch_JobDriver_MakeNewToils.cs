@@ -7,6 +7,7 @@ using Verse.AI;
 
 namespace SmarterConstruction.Patches
 {
+    // Fail during construction if the building would enclose something
     [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
     public class Patch_JobDriver_MakeNewToils
     {
@@ -21,15 +22,7 @@ namespace SmarterConstruction.Patches
                     {
                         if (t.defaultCompleteMode == ToilCompleteMode.Delay)
                         {
-                            t.AddFailCondition(() =>
-                            {
-                                if (ClosedRegionDetector.WouldEncloseThings(___job.targetA.Thing, ___pawn))
-                                {
-                                    Log.Message("Failed " + ___job.targetA.Cell);
-                                    return true;
-                                }
-                                return false;
-                            });
+                            t.AddFailCondition(() => ClosedRegionDetector.WouldEncloseThings(___job.targetA.Thing, ___pawn));
                         }
                         yield return t;
                     }
