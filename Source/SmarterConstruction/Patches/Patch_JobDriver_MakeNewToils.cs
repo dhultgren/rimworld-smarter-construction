@@ -17,16 +17,13 @@ namespace SmarterConstruction.Patches
             if (___job.def == JobDefOf.FinishFrame && !___job.playerForced)
             {
                 var passability = ___job.targetA.Thing?.def?.entityDefToBuild?.passability;
-                if (passability == Traversability.Impassable)
+                foreach (var t in __result)
                 {
-                    foreach (var t in __result)
+                    if (passability == Traversability.Impassable && t.defaultCompleteMode == ToilCompleteMode.Delay)
                     {
-                        if (t.defaultCompleteMode == ToilCompleteMode.Delay)
-                        {
-                            t.AddFailCondition(() => ClosedRegionDetector.WouldEncloseThings(___job.targetA.Thing, ___pawn));
-                        }
-                        yield return t;
+                        t.AddFailCondition(() => ClosedRegionDetector.WouldEncloseThings(___job.targetA.Thing, ___pawn));
                     }
+                    yield return t;
                 }
             }
         }
