@@ -18,7 +18,7 @@ namespace SmarterConstructionSpec
                 new IntVec3(2, 0, 0)
             });
 
-            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, IntVec3.Zero);
+            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, new HashSet<IntVec3> { IntVec3.Zero });
 
             Assert.Empty(result);
         }
@@ -34,7 +34,7 @@ namespace SmarterConstructionSpec
                 new IntVec3(0, 0, 1)
             });
 
-            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, IntVec3.Zero);
+            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, new HashSet<IntVec3> { IntVec3.Zero });
 
             Assert.Empty(result);
         }
@@ -49,7 +49,7 @@ namespace SmarterConstructionSpec
                 new IntVec3(1, 0, 1)
             });
 
-            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, IntVec3.Zero);
+            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, new HashSet<IntVec3> { IntVec3.Zero });
 
             Assert.Single(result);
             Assert.All(result, p => Assert.Equal(new IntVec3(1, 0, 0), p));
@@ -77,10 +77,45 @@ namespace SmarterConstructionSpec
                 new IntVec3(-2, 0, 0)
             });
 
-            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, IntVec3.Zero);
+            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, new HashSet<IntVec3> { IntVec3.Zero });
 
             Assert.Equal(2, result.Count);
             Assert.Single(result, pos => pos == new IntVec3(-1, 0, 0));
+            Assert.Single(result, pos => pos == new IntVec3(1, 0, 0));
+        }
+
+        [Fact]
+        public void ClosedRegionCreatedByAddingImpassable_MultipleBlockedTiles()
+        {
+            /*
+             *  2 ###
+             *  1 #
+             *  0 #
+             * -1 .#
+             */
+            var mock = CreateMockWithImpassableTiles(new List<IntVec3>
+            {
+                new IntVec3(2, 0, 2),
+                new IntVec3(1, 0, 2),
+                new IntVec3(0, 0, 2),
+                new IntVec3(0, 0, 1),
+                new IntVec3(0, 0, 0),
+                new IntVec3(1, 0, -1)
+            });
+            /*
+             *  1 ..#
+             *  0 ..#
+             */
+            var blockers = new HashSet<IntVec3>
+            {
+                new IntVec3(2, 0, 1),
+                new IntVec3(2, 0, 0)
+            };
+
+            var result = ClosedRegionDetector.ClosedRegionCreatedByAddingImpassable(mock, blockers);
+
+            Assert.Equal(2, result.Count);
+            Assert.Single(result, pos => pos == new IntVec3(1, 0, 1));
             Assert.Single(result, pos => pos == new IntVec3(1, 0, 0));
         }
 
