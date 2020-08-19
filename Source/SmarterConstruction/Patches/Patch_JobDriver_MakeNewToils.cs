@@ -14,7 +14,7 @@ namespace SmarterConstruction.Patches
     {
         public static IEnumerable<Toil> Postfix(IEnumerable<Toil> __result, JobDriver_ConstructFinishFrame __instance, Pawn ___pawn, Job ___job)
         {
-            if (___job.def == JobDefOf.FinishFrame && !___job.playerForced)
+            if (___job.def == JobDefOf.FinishFrame/* && !___job.playerForced*/)
             {
                 var passability = ___job.targetA.Thing?.def?.entityDefToBuild?.passability;
                 foreach (var t in __result)
