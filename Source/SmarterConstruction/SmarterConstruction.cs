@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using SmarterConstruction.Patches;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -20,7 +21,9 @@ namespace SmarterConstruction
 
         static SmarterConstruction()
         {
-            new Harmony("SmarterConstruction").PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("SmarterConstruction");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Patch_JobDriver_MakeNewToils.Patch(harmony);
         }
     }
 }

@@ -13,6 +13,10 @@ namespace SmarterConstruction.Pathfinding
         private static readonly Dictionary<Thing, Tuple<bool, int>> WouldEncloseThingsCache = new Dictionary<Thing, Tuple<bool, int>>();
         private static readonly int EncloseThingCacheTicks = 5;
 
+        private static readonly int TicksBetweenLogs = 50;
+        private static int totalChecks = 0;
+        private static int totalCacheHits = 0;
+
         public static bool WouldEncloseThings(Thing target, Pawn ___pawn)
         {
             if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return false;
@@ -21,11 +25,13 @@ namespace SmarterConstruction.Pathfinding
                 var tuple = WouldEncloseThingsCache[target];
                 if (tuple.Item2 > Find.TickManager.TicksGame)
                 {
+                    if (++totalCacheHits % TicksBetweenLogs == 0) DebugLog("Cache hit #" + totalCacheHits);
                     return tuple.Item1;
                 }
                 WouldEncloseThingsCache.Remove(target);
             }
 
+            if (++totalChecks % TicksBetweenLogs == 0) DebugLog("Enclose check #" + totalChecks);
             var retValue = false;
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
             var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathGrid), blockedPositions);
@@ -122,6 +128,13 @@ namespace SmarterConstruction.Pathfinding
             yield return new IntVec3(pos.x, pos.y, pos.z - 1);
             yield return new IntVec3(pos.x + 1, pos.y, pos.z);
             yield return new IntVec3(pos.x, pos.y, pos.z + 1);
+        }
+
+        private static void DebugLog(string text)
+        {
+#if DEBUG
+            Log.Message(text, true);
+#endif
         }
     }
 }
