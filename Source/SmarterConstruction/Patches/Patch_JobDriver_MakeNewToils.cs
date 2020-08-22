@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿#define TRANSPILER
+
+using HarmonyLib;
 using RimWorld;
 using SmarterConstruction.Pathfinding;
 using System.Collections.Generic;
@@ -11,15 +13,40 @@ using Verse.AI.Group;
 
 namespace SmarterConstruction.Patches
 {
+#if !TRANSPILER
+    // Fail during construction if the building would enclose something
+    [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
+    public class Patch_JobDriver_MakeNewToils_Postfix
+    {
+        public static IEnumerable<Toil> Postfix(IEnumerable<Toil> __result, JobDriver_ConstructFinishFrame __instance, Pawn ___pawn, Job ___job)
+        {
+            if (___job.def == JobDefOf.FinishFrame)
+            {
+                var passability = ___job.targetA.Thing?.def?.entityDefToBuild?.passability;
+                foreach (var t in __result)
+                {
+                    if (passability == Traversability.Impassable && t.defaultCompleteMode == ToilCompleteMode.Delay)
+                    {
+                        t.AddFailCondition(() => ClosedRegionDetector.WouldEncloseThings(___job.targetA.Thing, ___pawn));
+                    }
+                    yield return t;
+                }
+            }
+        }
+    }
+#endif
+
     // Fail during construction if the building would enclose something
     public class Patch_JobDriver_MakeNewToils
     {
         public static void Patch(Harmony harmony)
         {
+#if TRANSPILER
             var nestedTypes = typeof(JobDriver_ConstructFinishFrame).GetNestedTypes(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
             var targetType = nestedTypes.FirstOrDefault(t => t.Name == "<>c__DisplayClass4_0");
             var targetMethod = targetType.GetRuntimeMethods().FirstOrDefault(m => m.Name == "<MakeNewToils>b__1");
             harmony.Patch(targetMethod, transpiler: new HarmonyMethod(typeof(Patch_JobDriver_MakeNewToils), nameof(Transpiler)));
+#endif
         }
 
         static List<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
