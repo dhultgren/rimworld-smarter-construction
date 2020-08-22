@@ -59,7 +59,7 @@ namespace SmarterConstruction.Pathfinding
 
         public static HashSet<IntVec3> ClosedRegionCreatedByAddingImpassable(IPathGrid pathGrid, HashSet<IntVec3> addedBlockers)
         {
-            var neighbors = GetCardinalNeighbors(addedBlockers);
+            var neighbors = NeighborCounter.GetCardinalNeighbors(addedBlockers);
             var closedRegion = new HashSet<IntVec3>();
             var curRegion = new HashSet<IntVec3>();
             foreach (var pos in neighbors)
@@ -89,7 +89,7 @@ namespace SmarterConstruction.Pathfinding
                 if (!region.Contains(pos) && pathGrid.Walkable(pos) && !addedBlockers.Contains(pos))
                 {
                     region.Add(pos);
-                    var neighbors = GetCardinalNeighbors(pos);
+                    var neighbors = NeighborCounter.GetCardinalNeighbors(pos);
                     foreach (var n in neighbors) queuedPositions.Enqueue(n);
                 }
             }
@@ -109,25 +109,6 @@ namespace SmarterConstruction.Pathfinding
                 if (!WouldEncloseThings(target, null)) return pos;
             }
             return IntVec3.Invalid;
-        }
-
-        private static HashSet<IntVec3> GetCardinalNeighbors(HashSet<IntVec3> blockers)
-        {
-            var ret = new HashSet<IntVec3>();
-            foreach (var pos in blockers)
-            {
-                ret.AddRange(GetCardinalNeighbors(pos));
-            }
-            ret.RemoveWhere(pos => blockers.Contains(pos));
-            return ret;
-        }
-
-        private static IEnumerable<IntVec3> GetCardinalNeighbors(IntVec3 pos)
-        {
-            yield return new IntVec3(pos.x - 1, pos.y, pos.z);
-            yield return new IntVec3(pos.x, pos.y, pos.z - 1);
-            yield return new IntVec3(pos.x + 1, pos.y, pos.z);
-            yield return new IntVec3(pos.x, pos.y, pos.z + 1);
         }
 
         private static void DebugLog(string text)

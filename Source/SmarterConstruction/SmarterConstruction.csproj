@@ -64,6 +64,7 @@
     <Compile Include="Patches\Patch_WorkGiver_Scanner_Prioritized.cs" />
     <Compile Include="Patches\WorkGiver_ConstructFinishFrames_JobOnThing.cs" />
     <Compile Include="Pathfinding\ClosedRegionDetector.cs" />
+    <Compile Include="Pathfinding\NeighborCounter.cs" />
     <Compile Include="Pathfinding\PathGridWrapper.cs" />
     <Compile Include="SmarterConstruction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

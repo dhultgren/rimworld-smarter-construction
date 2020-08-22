@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using SmarterConstruction.Pathfinding;
 using System;
 using System.Linq;
 using Verse;
@@ -11,6 +12,7 @@ namespace SmarterConstruction.Patches
     public class Patch_WorkGiver_Scanner_GetPriority
     {
         private static readonly int MaxDistanceForPriority = 10;
+
         public static void Postfix(Pawn pawn, TargetInfo t, ref float __result, WorkGiver_Scanner __instance)
         {
             if (pawn?.Faction?.IsPlayer != true) return;
@@ -19,19 +21,9 @@ namespace SmarterConstruction.Patches
             if (!SmarterConstruction.PatchWorkGiverTypes.Contains(__instance?.GetType())) return;
             if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
 
-            float modPriority = CountImpassableNeighbors(t.Cell, pawn.Map ?? t.Map);
+            float modPriority = NeighborCounter.CountImpassableNeighbors(t.Thing);
 
             __result += modPriority;
-        }
-
-        private static int CountImpassableNeighbors(IntVec3 center, Verse.Map map)
-        {
-            var possiblePositions = Enumerable.Range(-1, 3)
-                .SelectMany(y => Enumerable.Range(-1, 3)
-                    .Where(x => !(y == 0 && x == 0))
-                    .Select(x => new IntVec3(center.x + x, 0, center.z + y)))
-                .ToList();
-            return possiblePositions.Count(pos => !map.pathGrid.Walkable(pos));
         }
     }
 }
