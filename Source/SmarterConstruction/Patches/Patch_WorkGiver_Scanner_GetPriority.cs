@@ -10,12 +10,14 @@ namespace SmarterConstruction.Patches
     [HarmonyPatch(typeof(WorkGiver_Scanner), "GetPriority", new Type[] { typeof(Pawn), typeof(TargetInfo) })]
     public class Patch_WorkGiver_Scanner_GetPriority
     {
+        private static readonly int MaxDistanceForPriority = 10;
         public static void Postfix(Pawn pawn, TargetInfo t, ref float __result, WorkGiver_Scanner __instance)
         {
             if (pawn == null || pawn.Faction?.IsPlayer != true) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
             if (__result < 0) return;
             if (!SmarterConstruction.PatchWorkGiverTypes.Contains(__instance.GetType())) return;
+            if (pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
 
             float modPriority = CountImpassableNeighbors(t.Cell, pawn.Map ?? t.Map);
 
