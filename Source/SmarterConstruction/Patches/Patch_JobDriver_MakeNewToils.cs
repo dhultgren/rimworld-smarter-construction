@@ -83,6 +83,7 @@ namespace SmarterConstruction.Patches
         public static bool EndJobIfEnclosing(Frame target, Pawn pawn)
         {
             if (target?.def?.entityDefToBuild?.passability != Traversability.Impassable) return false;
+            if (pawn?.CurJob?.playerForced == true) return false;
             var wouldEnclose = ClosedRegionDetector.WouldEncloseThings(target, pawn);
             if (wouldEnclose)
             {
