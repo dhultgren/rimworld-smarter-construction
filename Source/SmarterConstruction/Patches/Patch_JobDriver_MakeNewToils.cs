@@ -57,12 +57,9 @@ namespace SmarterConstruction.Patches
             var instructionList = instructions.ToList();
 
             var insertionIndex = instructionList.FirstIndexOf(instruction => instruction.opcode == OpCodes.Callvirt && instruction.Calls(completeConstructionCall)) - 2;
-            var jumpInstruction = instructionList
-                .Take(insertionIndex)
-                .Reverse()
-                .FirstOrDefault(instruction => instruction.opcode == OpCodes.Blt_Un_S);
-            var label = generator.DefineLabel();
-            instructionList[insertionIndex + 3].labels.Add(label);
+            var retInstruction = instructionList
+                .Skip(insertionIndex)
+                .FirstOrDefault(instruction => instruction.opcode == OpCodes.Ret && instruction.labels.Count > 0);
 
             instructionList.InsertRange(insertionIndex, new[] {
                 new CodeInstruction(OpCodes.Ldloc_1),                         // Set workDone = workToBuild to avoid graphic glitch
@@ -72,7 +69,7 @@ namespace SmarterConstruction.Patches
                 new CodeInstruction(OpCodes.Ldloc_1),                         // Skip CompleteConstruction if the building would enclose something
                 new CodeInstruction(OpCodes.Ldloc_0),                         //
                 new CodeInstruction(OpCodes.Call, testEncloseCall),           //
-                new CodeInstruction(OpCodes.Brtrue, label),                   //
+                new CodeInstruction(OpCodes.Brtrue, retInstruction.labels[0])//
             });
             return instructionList;
         }
@@ -88,7 +85,6 @@ namespace SmarterConstruction.Patches
             if (wouldEnclose)
             {
                 pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
-                pawn.GetLord()?.Notify_ConstructionFailed(pawn, target, null);
                 return true;
             }
 
