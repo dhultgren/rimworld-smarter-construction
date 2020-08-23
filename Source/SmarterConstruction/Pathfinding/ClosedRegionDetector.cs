@@ -114,7 +114,7 @@ namespace SmarterConstruction.Pathfinding
         private static void DebugLog(string text)
         {
 #if DEBUG
-            Log.Message(text, true);
+            //Log.Message(text, true);
 #endif
         }
     }

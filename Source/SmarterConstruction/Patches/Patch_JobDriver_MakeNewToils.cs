@@ -36,6 +36,34 @@ namespace SmarterConstruction.Patches
     }
 #endif
 
+    // Hack to stop pawns from getting stuck in the pathfinding when something changes on the way
+    // TODO: do it right instead
+    [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
+    public class Patch_JobDriver_MakeNewToils_Postfix
+    {
+        private static readonly int MaxGotoTicks = 8000;
+
+        public static IEnumerable<Toil> Postfix(IEnumerable<Toil> __result, JobDriver_ConstructFinishFrame __instance, Pawn ___pawn, Job ___job)
+        {
+            foreach (var t in __result)
+            {
+                if (t.defaultCompleteMode == ToilCompleteMode.PatherArrival)
+                {
+                    t.AddFailCondition(() =>
+                    {
+                        if (t?.actor?.CurJob?.startTick + MaxGotoTicks < Find.TickManager.TicksGame)
+                        {
+                            Log.Message("Smarter Construction: Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                yield return t;
+            }
+        }
+    }
+
     // Fail during construction if the building would enclose something
     public class Patch_JobDriver_MakeNewToils
     {
@@ -81,6 +109,7 @@ namespace SmarterConstruction.Patches
         {
             if (target?.def?.entityDefToBuild?.passability != Traversability.Impassable) return false;
             if (pawn?.CurJob?.playerForced == true) return false;
+
             var wouldEnclose = ClosedRegionDetector.WouldEncloseThings(target, pawn);
             if (wouldEnclose)
             {
