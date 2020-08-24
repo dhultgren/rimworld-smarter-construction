@@ -1,5 +1,5 @@
 ﻿using NSubstitute;
-using SmarterConstruction.Pathfinding;
+using SmarterConstruction.Core;
 using System.Collections.Generic;
 using Verse;
 using Xunit;

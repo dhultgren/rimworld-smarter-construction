@@ -1,7 +1,7 @@
 ﻿using Verse;
 using Verse.AI;
 
-namespace SmarterConstruction.Pathfinding
+namespace SmarterConstruction.Core
 {
     public interface IPathGrid
     {

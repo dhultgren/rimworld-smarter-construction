@@ -2,7 +2,7 @@
 
 using HarmonyLib;
 using RimWorld;
-using SmarterConstruction.Pathfinding;
+using SmarterConstruction.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

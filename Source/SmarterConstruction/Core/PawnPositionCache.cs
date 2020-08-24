@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Verse;
 
-namespace SmarterConstruction.Pathfinding
+namespace SmarterConstruction.Core
 {
     class PawnPositionCache
     {

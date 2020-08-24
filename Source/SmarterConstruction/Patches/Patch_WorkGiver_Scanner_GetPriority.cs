@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using SmarterConstruction.Pathfinding;
+using SmarterConstruction.Core;
 using System;
 using System.Linq;
 using Verse;

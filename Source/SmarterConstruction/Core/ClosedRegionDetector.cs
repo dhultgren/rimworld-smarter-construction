@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace SmarterConstruction.Pathfinding
+namespace SmarterConstruction.Core
 {
     public static class ClosedRegionDetector
     {
