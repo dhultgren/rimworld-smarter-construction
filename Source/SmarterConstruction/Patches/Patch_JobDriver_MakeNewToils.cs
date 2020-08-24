@@ -54,7 +54,7 @@ namespace SmarterConstruction.Patches
                     {
                         if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0 && PawnPositionCache.IsPawnStuck(t?.actor))
                         {
-                            Log.Message("Smarter Construction: Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
+                            DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
                             return true;
                         }
                         return false;
@@ -112,13 +112,35 @@ namespace SmarterConstruction.Patches
             if (pawn?.CurJob?.playerForced == true) return false;
 
             var wouldEnclose = ClosedRegionDetector.WouldEncloseThings(target, pawn);
-            if (wouldEnclose)
+            if (wouldEnclose.EnclosesThings)
             {
                 pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
                 return true;
             }
+            //DebugUtils.VerboseLog(pawn.Label + " finished " + target.Label + " on coordinates " + target.Position);
 
-            // TODO: move pawn to a safe location if it's standing on top of the current target to avoid random movement
+            var pawnsAtLocation = target.Position.GetThingList(target.Map)
+                .Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer)
+                .ToList();
+            if (pawnsAtLocation.Count > 0 && wouldEnclose.EnclosesRegion)
+            {
+                // move pawn to a safe location to avoid random movement
+                var safePositions = ClosedRegionDetector.FindSafeConstructionSpots(new PathGridWrapper(target.Map.pathGrid), target);
+                if (safePositions.Count == 0)
+                {
+                    pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+                    return true;
+                }
+                else
+                {
+                    var safePosition = safePositions.First();
+                    pawnsAtLocation.ForEach(p =>
+                    {
+                        DebugUtils.DebugLog($"Teleported pawn {pawn.Label} from {pawn.Position} to {safePosition}");
+                        p.Position = safePosition;
+                    });
+                }
+            }
 
             return false;
         }

@@ -13,7 +13,7 @@ namespace SmarterConstruction.Patches
         public static void Postfix(Pawn pawn, Thing t, ref Job __result, bool forced, WorkGiver_ConstructFinishFrames __instance)
         {
             if (t?.def?.entityDefToBuild?.passability == Traversability.Impassable
-                && ClosedRegionDetector.WouldEncloseThings(t, pawn)
+                && ClosedRegionDetector.WouldEncloseThings(t, pawn).EnclosesThings
                 && !forced)
             {
                 __result = null;

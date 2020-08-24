@@ -9,14 +9,19 @@ namespace SmarterConstruction.Core
         public static int CountImpassableNeighbors(Thing thing)
         {
             var thingCells = GenAdj.CellsOccupiedBy(thing.Position, thing.Rotation, thing.def.Size).ToHashSet();
-            var possiblePositions = thingCells
+            var possiblePositions = GetAllNeighbors(thingCells);
+            return possiblePositions.Count(pos => thing?.Map?.pathGrid?.Walkable(pos) != true);
+        }
+
+        public static HashSet<IntVec3> GetAllNeighbors(HashSet<IntVec3> blockers)
+        {
+            var ret = blockers
                 .SelectMany(center => Enumerable.Range(-1, 3)
                     .SelectMany(y => Enumerable.Range(-1, 3)
-                        .Where(x => !(y == 0 && x == 0))
                         .Select(x => new IntVec3(center.x + x, 0, center.z + y))))
-                .Where(pos => !thingCells.Contains(pos))
                 .ToHashSet();
-            return possiblePositions.Count(pos => thing?.Map?.pathGrid?.Walkable(pos) != true);
+            ret.RemoveWhere(pos => blockers.Contains(pos));
+            return ret;
         }
 
         public static HashSet<IntVec3> GetCardinalNeighbors(HashSet<IntVec3> blockers)

@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -10,29 +9,29 @@ namespace SmarterConstruction.Core
     {
         public static readonly int MaxRegionSize = 50;
 
-        private static readonly Dictionary<Thing, Tuple<bool, int>> WouldEncloseThingsCache = new Dictionary<Thing, Tuple<bool, int>>();
+        private static readonly Dictionary<Thing, CachedEncloseThingsResult> WouldEncloseThingsCache = new Dictionary<Thing, CachedEncloseThingsResult>();
         private static readonly int EncloseThingCacheTicks = 5;
 
         private static readonly int TicksBetweenLogs = 50;
         private static int totalChecks = 0;
         private static int totalCacheHits = 0;
 
-        public static bool WouldEncloseThings(Thing target, Pawn ___pawn)
+        public static EncloseThingsResult WouldEncloseThings(Thing target, Pawn ___pawn)
         {
-            if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return false;
+            if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
             if (WouldEncloseThingsCache.ContainsKey(target))
             {
-                var tuple = WouldEncloseThingsCache[target];
-                if (tuple.Item2 > Find.TickManager.TicksGame)
+                var cachedResult = WouldEncloseThingsCache[target];
+                if (cachedResult.ExpiresAtTick > Find.TickManager.TicksGame)
                 {
-                    if (++totalCacheHits % TicksBetweenLogs == 0) DebugLog("Cache hit #" + totalCacheHits);
-                    return tuple.Item1;
+                    //if (++totalCacheHits % TicksBetweenLogs == 0) DebugUtils.DebugLog("Cache hit #" + totalCacheHits);
+                    return cachedResult.EncloseThingsResult;
                 }
                 WouldEncloseThingsCache.Remove(target);
             }
 
-            if (++totalChecks % TicksBetweenLogs == 0) DebugLog("Enclose check #" + totalChecks);
-            var retValue = false;
+            //if (++totalChecks % TicksBetweenLogs == 0) DebugUtils.DebugLog("Enclose check #" + totalChecks);
+            var retValue = new EncloseThingsResult();
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
             var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathGrid), blockedPositions);
             if (closedRegion.Count > 0)
@@ -40,19 +39,15 @@ namespace SmarterConstruction.Core
                 var enclosedThings = closedRegion.SelectMany(p => p.GetThingList(target.Map)).ToList();
                 var enclosedUnacceptable = enclosedThings.Where(t => t is Blueprint || t is Frame).ToList();
                 var enclosedPlayerPawns = enclosedThings.Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer).ToList();
-                // TODO: move pawn if it detects that it's going to enclose itself?
-                /*if (enclosedUnacceptable.Count == 0 && enclosedPlayerPawns.Count == 1 && enclosedPlayerPawns[0] == ___pawn)
-                {
-                    var pos = FindSafeConstructionSpot(target);
-                    if (pos.IsValid)
-                    {
-                        ___pawn.SetPositionDirect(pos); // TODO: actually walk to safe position
-                    }
-                }*/
 
-                retValue = enclosedUnacceptable.Count > 0 || enclosedPlayerPawns.Count > 0;
+                retValue.EnclosesRegion = true;
+                retValue.EnclosesThings = enclosedUnacceptable.Count > 0 || enclosedPlayerPawns.Count > 0;
             }
-            WouldEncloseThingsCache[target] = new Tuple<bool, int>(retValue, Find.TickManager.TicksGame + EncloseThingCacheTicks);
+            WouldEncloseThingsCache[target] = new CachedEncloseThingsResult
+            {
+                EncloseThingsResult = retValue,
+                ExpiresAtTick = Find.TickManager.TicksGame + EncloseThingCacheTicks
+            };
             return retValue;
         }
 
@@ -76,7 +71,7 @@ namespace SmarterConstruction.Core
         private static HashSet<IntVec3> FloodFill(IPathGrid pathGrid, IntVec3 start, HashSet<IntVec3> addedBlockers)
         {
             var region = new HashSet<IntVec3>();
-            if (!pathGrid.Walkable(start)) return region;
+            if (!pathGrid.WalkableFast(start)) return region;
 
             var queuedPositions = new Queue<IntVec3>();
             queuedPositions.Enqueue(start);
@@ -85,7 +80,7 @@ namespace SmarterConstruction.Core
                 if (region.Count >= MaxRegionSize) break;
 
                 var pos = queuedPositions.Dequeue();
-                if (!region.Contains(pos) && pathGrid.Walkable(pos) && !addedBlockers.Contains(pos))
+                if (!region.Contains(pos) && pathGrid.WalkableFast(pos) && !addedBlockers.Contains(pos))
                 {
                     region.Add(pos);
                     var neighbors = NeighborCounter.GetCardinalNeighbors(pos);
@@ -95,26 +90,36 @@ namespace SmarterConstruction.Core
             return region;
         }
 
-        private static IntVec3 FindSafeConstructionSpot(Thing target)
+        public static HashSet<IntVec3> FindSafeConstructionSpots(IPathGrid pathGrid, Thing target)
         {
-            var possiblePositions = Enumerable.Range(-1, 3)
-                .SelectMany(y => Enumerable.Range(-1, 3)
-                    .Where(x => !(y == 0 && x == 0))
-                    .Select(x => new IntVec3(x, 0, y)))
-                .ToList();
+            var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
+            return FindSafeConstructionSpots(pathGrid, blockedPositions);
+        }
 
-            foreach (var pos in possiblePositions)
+        public static HashSet<IntVec3> FindSafeConstructionSpots(IPathGrid pathGrid, HashSet<IntVec3> addedBlockers)
+        {
+            var possiblePositions = NeighborCounter.GetAllNeighbors(addedBlockers);
+            var enclosedPositions = ClosedRegionCreatedByAddingImpassable(pathGrid, addedBlockers);
+            possiblePositions.RemoveWhere(pos =>
             {
-                if (!WouldEncloseThings(target, null)) return pos;
-            }
-            return IntVec3.Invalid;
+                if (enclosedPositions.Contains(pos)) return true;
+                if (!pathGrid.WalkableFast(pos)) return true;
+                return false;
+            });
+            return possiblePositions;
         }
 
-        private static void DebugLog(string text)
+        private class CachedEncloseThingsResult
         {
-#if DEBUG
-            //Log.Message(text, true);
-#endif
+            public EncloseThingsResult EncloseThingsResult { get; set; }
+            public int ExpiresAtTick { get; set; }
+
         }
+    }
+
+    public class EncloseThingsResult
+    {
+        public bool EnclosesRegion { get; set; }
+        public bool EnclosesThings { get; set; }
     }
 }
