@@ -66,6 +66,7 @@
     <Compile Include="Pathfinding\ClosedRegionDetector.cs" />
     <Compile Include="Pathfinding\NeighborCounter.cs" />
     <Compile Include="Pathfinding\PathGridWrapper.cs" />
+    <Compile Include="Pathfinding\PawnPositionCache.cs" />
     <Compile Include="SmarterConstruction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

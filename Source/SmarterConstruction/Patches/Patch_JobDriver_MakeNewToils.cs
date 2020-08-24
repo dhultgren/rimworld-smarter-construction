@@ -3,6 +3,7 @@
 using HarmonyLib;
 using RimWorld;
 using SmarterConstruction.Pathfinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -37,11 +38,11 @@ namespace SmarterConstruction.Patches
 #endif
 
     // Hack to stop pawns from getting stuck in the pathfinding when something changes on the way
-    // TODO: do it right instead
+    // TODO: find the actual cause
     [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
     public class Patch_JobDriver_MakeNewToils_Postfix
     {
-        private static readonly int MaxGotoTicks = 8000;
+        private static readonly int TicksBetweenCacheChecks = 50;
 
         public static IEnumerable<Toil> Postfix(IEnumerable<Toil> __result, JobDriver_ConstructFinishFrame __instance, Pawn ___pawn, Job ___job)
         {
@@ -51,7 +52,7 @@ namespace SmarterConstruction.Patches
                 {
                     t.AddFailCondition(() =>
                     {
-                        if (t?.actor?.CurJob?.startTick + MaxGotoTicks < Find.TickManager.TicksGame)
+                        if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0 && PawnPositionCache.IsPawnStuck(t?.actor))
                         {
                             Log.Message("Smarter Construction: Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
                             return true;
@@ -87,7 +88,7 @@ namespace SmarterConstruction.Patches
             var insertionIndex = instructionList.FirstIndexOf(instruction => instruction.opcode == OpCodes.Callvirt && instruction.Calls(completeConstructionCall)) - 2;
             var retInstruction = instructionList
                 .Skip(insertionIndex)
-                .FirstOrDefault(instruction => instruction.opcode == OpCodes.Ret && instruction.labels.Count > 0);
+                .First(instruction => instruction.opcode == OpCodes.Ret && instruction.labels.Count > 0);
 
             instructionList.InsertRange(insertionIndex, new[] {
                 new CodeInstruction(OpCodes.Ldloc_1),                         // Set workDone = workToBuild to avoid graphic glitch
@@ -97,7 +98,7 @@ namespace SmarterConstruction.Patches
                 new CodeInstruction(OpCodes.Ldloc_1),                         // Skip CompleteConstruction if the building would enclose something
                 new CodeInstruction(OpCodes.Ldloc_0),                         //
                 new CodeInstruction(OpCodes.Call, testEncloseCall),           //
-                new CodeInstruction(OpCodes.Brtrue, retInstruction.labels[0])//
+                new CodeInstruction(OpCodes.Brtrue, retInstruction.labels[0]) //
             });
             return instructionList;
         }
