@@ -40,7 +40,6 @@ namespace SmarterConstruction.Pathfinding
                 var enclosedThings = closedRegion.SelectMany(p => p.GetThingList(target.Map)).ToList();
                 var enclosedUnacceptable = enclosedThings.Where(t => t is Blueprint || t is Frame).ToList();
                 var enclosedPlayerPawns = enclosedThings.Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer).ToList();
-                // TODO: allow pawn to be enclosed if player forced
                 // TODO: move pawn if it detects that it's going to enclose itself?
                 /*if (enclosedUnacceptable.Count == 0 && enclosedPlayerPawns.Count == 1 && enclosedPlayerPawns[0] == ___pawn)
                 {

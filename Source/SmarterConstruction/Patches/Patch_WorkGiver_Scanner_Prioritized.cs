@@ -11,7 +11,7 @@ namespace SmarterConstruction.Patches
     {
         public static bool Prefix(WorkGiver_Scanner __instance, ref bool __result)
         {
-            if (!SmarterConstruction.PatchWorkGiverTypes.Contains(__instance.GetType())) return true;
+            if (!SmarterConstruction.AddPriorityToWorkgivers.Contains(__instance.GetType())) return true;
 
             __result = true;
             return false;

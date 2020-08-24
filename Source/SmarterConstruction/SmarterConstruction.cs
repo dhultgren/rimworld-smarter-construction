@@ -11,11 +11,11 @@ namespace SmarterConstruction
     [StaticConstructorOnStartup]
     public class SmarterConstruction
     {
-        public static readonly HashSet<Type> PatchWorkGiverTypes = new HashSet<Type>
+        public static readonly HashSet<Type> AddPriorityToWorkgivers = new HashSet<Type>
         {
-            typeof(WorkGiver_ConstructDeliverResources),
+            /*typeof(WorkGiver_ConstructDeliverResources),
             typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
-            typeof(WorkGiver_ConstructDeliverResourcesToFrames),
+            typeof(WorkGiver_ConstructDeliverResourcesToFrames),*/
             typeof(WorkGiver_ConstructFinishFrames)
         };
 

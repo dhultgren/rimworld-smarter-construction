@@ -10,19 +10,14 @@ namespace SmarterConstruction.Patches
     [HarmonyPatch(typeof(WorkGiver_ConstructFinishFrames), "JobOnThing")]
     public class WorkGiver_ConstructFinishFrames_JobOnThing
     {
-        public static bool Prefix(Pawn pawn, Thing t, ref Job __result, bool forced, WorkGiver_ConstructFinishFrames __instance)
+        public static void Postfix(Pawn pawn, Thing t, ref Job __result, bool forced, WorkGiver_ConstructFinishFrames __instance)
         {
-            var passability = t?.def?.entityDefToBuild?.passability;
-            if (passability == Traversability.Impassable && !forced)
+            if (t?.def?.entityDefToBuild?.passability == Traversability.Impassable
+                && ClosedRegionDetector.WouldEncloseThings(t, pawn)
+                && !forced)
             {
-                if (ClosedRegionDetector.WouldEncloseThings(t, pawn))
-                {
-                    __result = null;
-                    return false;
-                }
+                __result = null;
             }
-
-            return true;
         }
     }
 }
