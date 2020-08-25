@@ -117,11 +117,12 @@ namespace SmarterConstruction.Patches
                 pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
                 return true;
             }
-            //DebugUtils.VerboseLog(pawn.Label + " finished " + target.Label + " on coordinates " + target.Position);
+            DebugUtils.VerboseLog(pawn.Label + " finished " + target.Label + " on coordinates " + target.Position);
 
             var pawnsAtLocation = target.Position.GetThingList(target.Map)
                 .Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer)
                 .ToList();
+            if (wouldEnclose.EnclosesSelf) pawnsAtLocation.Add(pawn);
             if (pawnsAtLocation.Count > 0 && wouldEnclose.EnclosesRegion)
             {
                 // move pawn to a safe location to avoid random movement

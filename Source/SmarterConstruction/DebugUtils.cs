@@ -14,7 +14,7 @@ namespace SmarterConstruction
 
         public static void VerboseLog(string text)
         {
-            Log.Message(Find.TickManager.TicksGame + ": " + text, true);
+            //Log.Message(Find.TickManager.TicksGame + ": " + text, true);
         }
     }
 }

@@ -60,7 +60,6 @@
   <ItemGroup>
     <Compile Include="DebugUtils.cs" />
     <Compile Include="Patches\Patch_JobDriver_MakeNewToils.cs" />
-    <Compile Include="Patches\Patch_WorkGiver_ConstructDeliverResources.cs" />
     <Compile Include="Patches\Patch_WorkGiver_Scanner_GetPriority.cs" />
     <Compile Include="Patches\Patch_WorkGiver_Scanner_Prioritized.cs" />
     <Compile Include="Patches\WorkGiver_ConstructFinishFrames_JobOnThing.cs" />

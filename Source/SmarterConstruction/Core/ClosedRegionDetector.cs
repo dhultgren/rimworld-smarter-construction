@@ -41,7 +41,8 @@ namespace SmarterConstruction.Core
                 var enclosedPlayerPawns = enclosedThings.Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer).ToList();
 
                 retValue.EnclosesRegion = true;
-                retValue.EnclosesThings = enclosedUnacceptable.Count > 0 || enclosedPlayerPawns.Count > 0;
+                retValue.EnclosesThings = enclosedUnacceptable.Count > 0 || enclosedPlayerPawns.Count(p => p != ___pawn) > 0;
+                retValue.EnclosesSelf = enclosedPlayerPawns.Any(p => p == ___pawn);
             }
             WouldEncloseThingsCache[target] = new CachedEncloseThingsResult
             {
@@ -121,5 +122,6 @@ namespace SmarterConstruction.Core
     {
         public bool EnclosesRegion { get; set; }
         public bool EnclosesThings { get; set; }
+        public bool EnclosesSelf { get; set; }
     }
 }

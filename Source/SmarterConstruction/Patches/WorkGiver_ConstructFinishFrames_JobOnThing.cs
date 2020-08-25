@@ -12,11 +12,17 @@ namespace SmarterConstruction.Patches
     {
         public static void Postfix(Pawn pawn, Thing t, ref Job __result, bool forced, WorkGiver_ConstructFinishFrames __instance)
         {
-            if (t?.def?.entityDefToBuild?.passability == Traversability.Impassable
-                && ClosedRegionDetector.WouldEncloseThings(t, pawn).EnclosesThings
-                && !forced)
+            if (t?.def?.entityDefToBuild?.passability == Traversability.Impassable && !forced)
             {
-                __result = null;
+                var encloseData = ClosedRegionDetector.WouldEncloseThings(t, pawn);
+                if (encloseData.EnclosesSelf)
+                {
+                    DebugUtils.VerboseLog($"Allowing self enclosing job on {t.Position} for pawn {pawn.Label} expecting a teleport.");
+                }
+                if (encloseData.EnclosesThings)
+                {
+                    __result = null;
+                }
             }
         }
     }
