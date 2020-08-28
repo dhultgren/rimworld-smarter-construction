@@ -5,7 +5,7 @@ namespace SmarterConstruction.Core
 {
     public interface IPathGrid
     {
-        bool WalkableFast(IntVec3 loc);
+        bool Walkable(IntVec3 loc);
     }
 
     public class PathGridWrapper : IPathGrid
@@ -16,9 +16,11 @@ namespace SmarterConstruction.Core
             _pathGrid = pathGrid;
         }
 
-        public bool WalkableFast(IntVec3 loc)
+        public bool Walkable(IntVec3 loc)
         {
-            return _pathGrid.WalkableFast(loc);
+            return SmarterConstruction.Settings.ChangeMapEdgesCompatibility
+                ? _pathGrid.Walkable(loc)
+                : _pathGrid.WalkableFast(loc);
         }
     }
 }

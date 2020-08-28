@@ -1,8 +1,5 @@
 ﻿using HarmonyLib;
-using RimWorld;
 using SmarterConstruction.Patches;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Verse;
 
@@ -11,16 +8,13 @@ namespace SmarterConstruction
     [StaticConstructorOnStartup]
     public class SmarterConstruction
     {
-        public static readonly HashSet<Type> AddPriorityToWorkgivers = new HashSet<Type>
-        {
-            /*typeof(WorkGiver_ConstructDeliverResources),
-            typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
-            typeof(WorkGiver_ConstructDeliverResourcesToFrames),*/
-            typeof(WorkGiver_ConstructFinishFrames)
-        };
+        public static SmarterConstructionSettings Settings { get; private set; }
 
         static SmarterConstruction()
         {
+            Settings = new SmarterConstructionSettings();
+            Compatibility.InitCompatibility();
+
             var harmony = new Harmony("SmarterConstruction");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             Patch_JobDriver_MakeNewToils.Patch(harmony);

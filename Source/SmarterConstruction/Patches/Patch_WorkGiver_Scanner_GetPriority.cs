@@ -2,7 +2,6 @@
 using RimWorld;
 using SmarterConstruction.Core;
 using System;
-using System.Linq;
 using Verse;
 
 namespace SmarterConstruction.Patches
@@ -18,7 +17,7 @@ namespace SmarterConstruction.Patches
             if (pawn?.Faction?.IsPlayer != true) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
             if (__result < 0) return;
-            if (!SmarterConstruction.AddPriorityToWorkgivers.Contains(__instance?.GetType())) return;
+            if (!SmarterConstruction.Settings.AddPriorityToWorkgivers.Contains(__instance?.GetType())) return;
             if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
 
             float modPriority = NeighborCounter.CountImpassableNeighbors(t.Thing);

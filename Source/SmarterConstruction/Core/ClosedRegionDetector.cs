@@ -72,7 +72,7 @@ namespace SmarterConstruction.Core
         private static HashSet<IntVec3> FloodFill(IPathGrid pathGrid, IntVec3 start, HashSet<IntVec3> addedBlockers)
         {
             var region = new HashSet<IntVec3>();
-            if (!pathGrid.WalkableFast(start)) return region;
+            if (!pathGrid.Walkable(start)) return region;
 
             var queuedPositions = new Queue<IntVec3>();
             queuedPositions.Enqueue(start);
@@ -81,7 +81,7 @@ namespace SmarterConstruction.Core
                 if (region.Count >= MaxRegionSize) break;
 
                 var pos = queuedPositions.Dequeue();
-                if (!region.Contains(pos) && pathGrid.WalkableFast(pos) && !addedBlockers.Contains(pos))
+                if (!region.Contains(pos) && pathGrid.Walkable(pos) && !addedBlockers.Contains(pos))
                 {
                     region.Add(pos);
                     var neighbors = NeighborCounter.GetCardinalNeighbors(pos);
@@ -104,7 +104,7 @@ namespace SmarterConstruction.Core
             possiblePositions.RemoveWhere(pos =>
             {
                 if (enclosedPositions.Contains(pos)) return true;
-                if (!pathGrid.WalkableFast(pos)) return true;
+                if (!pathGrid.Walkable(pos)) return true;
                 return false;
             });
             return possiblePositions;
