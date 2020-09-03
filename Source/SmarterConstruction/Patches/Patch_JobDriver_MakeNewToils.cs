@@ -143,6 +143,7 @@ namespace SmarterConstruction.Patches
                 }
             }
 
+            Patch_WorkGiver_Scanner_GetPriority.RemoveNeighborCachedData(target);
             return false;
         }
     }

@@ -24,6 +24,11 @@ namespace SmarterConstruction.Core
             return ret;
         }
 
+        public static HashSet<IntVec3> GetAllNeighbors(Thing thing)
+        {
+            return GetAllNeighbors(GenAdj.CellsOccupiedBy(thing.Position, thing.Rotation, thing.def.Size).ToHashSet());
+        }
+
         public static HashSet<IntVec3> GetCardinalNeighbors(HashSet<IntVec3> blockers)
         {
             var ret = blockers
