@@ -10,19 +10,18 @@ namespace SmarterConstruction.Core
         public static readonly int MaxRegionSize = 50;
 
         private static readonly Dictionary<Thing, CachedEncloseThingsResult> WouldEncloseThingsCache = new Dictionary<Thing, CachedEncloseThingsResult>();
-        private static readonly int EncloseThingCacheTicks = 5;
 
         private static readonly int TicksBetweenLogs = 50;
         private static int totalChecks = 0;
         private static int totalCacheHits = 0;
 
-        public static EncloseThingsResult WouldEncloseThings(Thing target, Pawn ___pawn)
+        public static EncloseThingsResult WouldEncloseThings(Thing target, Pawn ___pawn, int maxCacheLength)
         {
             if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
             if (WouldEncloseThingsCache.ContainsKey(target))
             {
                 var cachedResult = WouldEncloseThingsCache[target];
-                if (cachedResult.ExpiresAtTick > Find.TickManager.TicksGame)
+                if (cachedResult.CachedAtTick + maxCacheLength > Find.TickManager.TicksGame)
                 {
                     //if (++totalCacheHits % TicksBetweenLogs == 0) DebugUtils.DebugLog("Cache hit #" + totalCacheHits);
                     return cachedResult.EncloseThingsResult;
@@ -47,7 +46,7 @@ namespace SmarterConstruction.Core
             WouldEncloseThingsCache[target] = new CachedEncloseThingsResult
             {
                 EncloseThingsResult = retValue,
-                ExpiresAtTick = Find.TickManager.TicksGame + EncloseThingCacheTicks
+                CachedAtTick = Find.TickManager.TicksGame
             };
             return retValue;
         }
@@ -113,7 +112,7 @@ namespace SmarterConstruction.Core
         private class CachedEncloseThingsResult
         {
             public EncloseThingsResult EncloseThingsResult { get; set; }
-            public int ExpiresAtTick { get; set; }
+            public int CachedAtTick { get; set; }
 
         }
     }

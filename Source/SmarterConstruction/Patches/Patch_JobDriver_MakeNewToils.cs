@@ -111,7 +111,7 @@ namespace SmarterConstruction.Patches
             if (target?.def?.entityDefToBuild?.passability != Traversability.Impassable) return false;
             if (pawn?.CurJob?.playerForced == true) return false;
 
-            var wouldEnclose = ClosedRegionDetector.WouldEncloseThings(target, pawn);
+            var wouldEnclose = ClosedRegionDetector.WouldEncloseThings(target, pawn, SmarterConstruction.Settings.FinishEncloseThingCacheTicks);
             if (wouldEnclose.EnclosesThings)
             {
                 pawn.jobs.EndCurrentJob(JobCondition.Incompletable);

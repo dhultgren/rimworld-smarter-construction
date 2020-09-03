@@ -25,5 +25,7 @@ namespace SmarterConstruction
             typeof(WorkGiver_ConstructDeliverResourcesToFrames),*/
             typeof(WorkGiver_ConstructFinishFrames)
         };
+        public readonly int FinishEncloseThingCacheTicks = 5;
+        public readonly int GetJobEncloseThingCacheTicks = 30;
     }
 }
