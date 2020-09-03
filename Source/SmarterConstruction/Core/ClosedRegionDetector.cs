@@ -42,11 +42,11 @@ namespace SmarterConstruction.Core
             if (closedRegion.Count > 0)
             {
                 var enclosedThings = closedRegion.SelectMany(p => p.GetThingList(target.Map)).ToList();
-                var enclosedUnacceptable = enclosedThings.Where(t => t is Blueprint || t is Frame).ToList();
+                var hasEnclosedUnacceptable = enclosedThings.Any(t => t is Blueprint || t is Frame);
                 var enclosedPlayerPawns = enclosedThings.Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer).ToList();
 
                 retValue.EnclosesRegion = true;
-                retValue.EnclosesThings = enclosedUnacceptable.Count > 0 || enclosedPlayerPawns.Count(p => p != ___pawn) > 0;
+                retValue.EnclosesThings = hasEnclosedUnacceptable || enclosedPlayerPawns.Count(p => p != ___pawn) > 0;
                 retValue.EnclosesSelf = enclosedPlayerPawns.Any(p => p == ___pawn);
             }
             WouldEncloseThingsCache[target] = new CachedEncloseThingsResult
