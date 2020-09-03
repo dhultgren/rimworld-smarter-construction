@@ -14,20 +14,19 @@ namespace SmarterConstruction.Patches
         private static readonly int MaxDistanceForPriority = 10;
         private static readonly int MaxCacheTime = 2000;
 
-        private static Dictionary<IntVec3, CachedPriority> cache = new Dictionary<IntVec3, CachedPriority>();
+        private static readonly Dictionary<IntVec3, CachedPriority> cache = new Dictionary<IntVec3, CachedPriority>();
 
-        public static void Postfix(Pawn pawn, TargetInfo t, ref float __result, WorkGiver_Scanner __instance)
+        [HarmonyPostfix]
+        public static void PriorityPostfix(Pawn pawn, TargetInfo t, ref float __result, WorkGiver_Scanner __instance)
         {
             if (cache.TryGetValue(t.Cell, out CachedPriority data))
             {
                 if (data.CachedAtTick + MaxCacheTime < Find.TickManager.TicksGame)
                 {
-                    //DebugUtils.VerboseLog("Removing expired data " + t.Cell);
                     cache.Remove(t.Cell);
                 }
                 else
                 {
-                    //DebugUtils.VerboseLog("Using cached data " + t.Cell + " " + data.PriorityModifier);
                     __result += data.PriorityModifier;
                     return;
                 }
@@ -44,7 +43,6 @@ namespace SmarterConstruction.Patches
                 CachedAtTick = Find.TickManager.TicksGame,
                 PriorityModifier = modPriority
             };
-            //DebugUtils.VerboseLog("Cached priority for " + t.Cell + " : " + modPriority);
 
             __result += modPriority;
         }
@@ -52,8 +50,6 @@ namespace SmarterConstruction.Patches
         public static void RemoveNeighborCachedData(Thing thing)
         {
             var points = NeighborCounter.GetAllNeighbors(thing);
-            /*var removedPoints = cache.Where(pair => points.Contains(pair.Key)).ToList();
-            DebugUtils.VerboseLog($"Finished {thing.Position} and invalidating cached points {string.Join(", ", removedPoints.Select(p => p.Key))}");*/
             cache.RemoveAll(pair => points.Contains(pair.Key));
         }
 

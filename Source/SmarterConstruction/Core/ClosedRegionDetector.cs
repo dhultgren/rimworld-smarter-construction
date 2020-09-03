@@ -16,11 +16,11 @@ namespace SmarterConstruction.Core
 
         public static EncloseThingsResult WouldEncloseThings(Thing target, Pawn ___pawn, int maxCacheLength)
         {
-            if (Find.TickManager.TicksGame >= lastLogTick + TicksBetweenLogs)
+            /*if (Find.TickManager.TicksGame >= lastLogTick + TicksBetweenLogs)
             {
                 lastLogTick = Find.TickManager.TicksGame;
                 DebugUtils.DebugLog($"Cache hits {100 * totalCacheHits / (float)(totalChecks + totalCacheHits):F0}%");
-            }
+            }*/
             if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
 
             var cachedResult = cache.GetIfAvailable(target, maxCacheLength);
@@ -30,7 +30,7 @@ namespace SmarterConstruction.Core
                 return cachedResult;
             }
 
-            totalChecks++;
+            //totalChecks++;
             var retValue = new EncloseThingsResult();
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
             var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathGrid), blockedPositions);
