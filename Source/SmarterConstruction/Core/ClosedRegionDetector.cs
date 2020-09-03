@@ -7,7 +7,6 @@ namespace SmarterConstruction.Core
 {
     public static class ClosedRegionDetector
     {
-        public static readonly int MaxRegionSize = 50;
 
         private static readonly Dictionary<Thing, CachedEncloseThingsResult> WouldEncloseThingsCache = new Dictionary<Thing, CachedEncloseThingsResult>();
 
@@ -60,7 +59,7 @@ namespace SmarterConstruction.Core
             {
                 if (curRegion.Contains(pos)) continue;
                 curRegion = FloodFill(pathGrid, pos, addedBlockers);
-                if (curRegion.Count > 0 && curRegion.Count < MaxRegionSize)
+                if (curRegion.Count > 0 && curRegion.Count < SmarterConstruction.Settings.MaxRegionSize)
                 {
                     closedRegion.AddRange(curRegion);
                 }
@@ -77,7 +76,7 @@ namespace SmarterConstruction.Core
             queuedPositions.Enqueue(start);
             while (queuedPositions.Count > 0)
             {
-                if (region.Count >= MaxRegionSize) break;
+                if (region.Count >= SmarterConstruction.Settings.MaxRegionSize) break;
 
                 var pos = queuedPositions.Dequeue();
                 if (!region.Contains(pos) && pathGrid.Walkable(pos) && !addedBlockers.Contains(pos))

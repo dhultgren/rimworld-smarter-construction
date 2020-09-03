@@ -27,5 +27,6 @@ namespace SmarterConstruction
         };
         public readonly int FinishEncloseThingCacheTicks = 5;
         public readonly int GetJobEncloseThingCacheTicks = 30;
+        public readonly int MaxRegionSize = 50;
     }
 }
