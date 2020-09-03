@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compatibility.cs" />
+    <Compile Include="Core\EncloseThingsCache.cs" />
     <Compile Include="DebugUtils.cs" />
     <Compile Include="Patches\Patch_JobDriver_MakeNewToils.cs" />
     <Compile Include="Patches\Patch_JobDriver_MakeNewToils2.cs" />

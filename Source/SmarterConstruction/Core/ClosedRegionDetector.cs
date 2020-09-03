@@ -7,10 +7,10 @@ namespace SmarterConstruction.Core
 {
     public static class ClosedRegionDetector
     {
-        private static readonly Dictionary<Thing, CachedEncloseThingsResult> WouldEncloseThingsCache = new Dictionary<Thing, CachedEncloseThingsResult>();
-
         private static readonly int TicksBetweenLogs = 300;
-        private static int lastLogTick = Find.TickManager.TicksGame;
+
+        private static readonly EncloseThingsCache cache = new EncloseThingsCache();
+        private static int lastLogTick = 0;
         private static int totalChecks = 0;
         private static int totalCacheHits = 0;
 
@@ -22,19 +22,14 @@ namespace SmarterConstruction.Core
                 DebugUtils.DebugLog($"Cache hits {100 * totalCacheHits / (float)(totalChecks + totalCacheHits):F0}%");
             }
             if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
-            if (WouldEncloseThingsCache.ContainsKey(target))
+
+            var cachedResult = cache.GetIfAvailable(target, maxCacheLength);
+            if (cachedResult != null)
             {
-                var cachedResult = WouldEncloseThingsCache[target];
-                if (cachedResult.CachedAtTick + maxCacheLength > Find.TickManager.TicksGame)
-                {
-                    totalCacheHits++;
-                    //if (++totalCacheHits % TicksBetweenLogs == 0) DebugUtils.DebugLog("Cache hit #" + totalCacheHits);
-                    return cachedResult.EncloseThingsResult;
-                }
-                WouldEncloseThingsCache.Remove(target);
+                totalCacheHits++;
+                return cachedResult;
             }
 
-            //if (++totalChecks % TicksBetweenLogs == 0) DebugUtils.DebugLog("Enclose check #" + totalChecks);
             totalChecks++;
             var retValue = new EncloseThingsResult();
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
@@ -49,11 +44,7 @@ namespace SmarterConstruction.Core
                 retValue.EnclosesThings = hasEnclosedUnacceptable || enclosedPlayerPawns.Count(p => p != ___pawn) > 0;
                 retValue.EnclosesSelf = enclosedPlayerPawns.Any(p => p == ___pawn);
             }
-            WouldEncloseThingsCache[target] = new CachedEncloseThingsResult
-            {
-                EncloseThingsResult = retValue,
-                CachedAtTick = Find.TickManager.TicksGame
-            };
+            cache.Add(target, retValue);
             return retValue;
         }
 
@@ -114,19 +105,5 @@ namespace SmarterConstruction.Core
             });
             return possiblePositions;
         }
-
-        private class CachedEncloseThingsResult
-        {
-            public EncloseThingsResult EncloseThingsResult { get; set; }
-            public int CachedAtTick { get; set; }
-
-        }
-    }
-
-    public class EncloseThingsResult
-    {
-        public bool EnclosesRegion { get; set; }
-        public bool EnclosesThings { get; set; }
-        public bool EnclosesSelf { get; set; }
     }
 }

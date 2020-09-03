@@ -149,7 +149,7 @@ namespace SmarterConstructionSpec
         public void FindSafeConstructionSpots_SingleBlockerAllUnwalkable()
         {
             var mock = Substitute.For<IPathGrid>();
-            mock.WalkableFast(default).ReturnsForAnyArgs(false);
+            mock.Walkable(default).ReturnsForAnyArgs(false);
 
             var result = ClosedRegionDetector.FindSafeConstructionSpots(mock, new HashSet<IntVec3> { IntVec3.Zero });
 
@@ -204,10 +204,10 @@ namespace SmarterConstructionSpec
         private IPathGrid CreateMockWithImpassableTiles(List<IntVec3> impassableTiles)
         {
             var mock = Substitute.For<IPathGrid>();
-            mock.WalkableFast(default).ReturnsForAnyArgs(true);
+            mock.Walkable(default).ReturnsForAnyArgs(true);
             foreach(var tile in impassableTiles)
             {
-                mock.WalkableFast(tile).Returns(false);
+                mock.Walkable(tile).Returns(false);
             }
             return mock;
         }
