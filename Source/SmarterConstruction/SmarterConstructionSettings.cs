@@ -25,8 +25,8 @@ namespace SmarterConstruction
             typeof(WorkGiver_ConstructDeliverResourcesToFrames),*/
             typeof(WorkGiver_ConstructFinishFrames)
         };
-        public readonly int FinishEncloseThingCacheTicks = 5;
-        public readonly int GetJobEncloseThingCacheTicks = 30;
+        public readonly int FinishEncloseThingCacheTicks = 6;
+        public readonly int GetJobEncloseThingCacheTicks = 20;
         public readonly int MaxRegionSize = 50;
     }
 }

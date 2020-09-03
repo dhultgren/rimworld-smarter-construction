@@ -7,21 +7,27 @@ namespace SmarterConstruction.Core
 {
     public static class ClosedRegionDetector
     {
-
         private static readonly Dictionary<Thing, CachedEncloseThingsResult> WouldEncloseThingsCache = new Dictionary<Thing, CachedEncloseThingsResult>();
 
-        private static readonly int TicksBetweenLogs = 50;
+        private static readonly int TicksBetweenLogs = 300;
+        private static int lastLogTick = Find.TickManager.TicksGame;
         private static int totalChecks = 0;
         private static int totalCacheHits = 0;
 
         public static EncloseThingsResult WouldEncloseThings(Thing target, Pawn ___pawn, int maxCacheLength)
         {
+            if (Find.TickManager.TicksGame >= lastLogTick + TicksBetweenLogs)
+            {
+                lastLogTick = Find.TickManager.TicksGame;
+                DebugUtils.DebugLog($"Cache hits {100 * totalCacheHits / (float)(totalChecks + totalCacheHits):F0}%");
+            }
             if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
             if (WouldEncloseThingsCache.ContainsKey(target))
             {
                 var cachedResult = WouldEncloseThingsCache[target];
                 if (cachedResult.CachedAtTick + maxCacheLength > Find.TickManager.TicksGame)
                 {
+                    totalCacheHits++;
                     //if (++totalCacheHits % TicksBetweenLogs == 0) DebugUtils.DebugLog("Cache hit #" + totalCacheHits);
                     return cachedResult.EncloseThingsResult;
                 }
@@ -29,6 +35,7 @@ namespace SmarterConstruction.Core
             }
 
             //if (++totalChecks % TicksBetweenLogs == 0) DebugUtils.DebugLog("Enclose check #" + totalChecks);
+            totalChecks++;
             var retValue = new EncloseThingsResult();
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
             var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathGrid), blockedPositions);
