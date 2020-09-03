@@ -3,14 +3,12 @@
 using HarmonyLib;
 using RimWorld;
 using SmarterConstruction.Core;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Verse;
 using Verse.AI;
-using Verse.AI.Group;
 
 namespace SmarterConstruction.Patches
 {
@@ -36,34 +34,6 @@ namespace SmarterConstruction.Patches
         }
     }
 #endif
-
-    // Hack to stop pawns from getting stuck in the pathfinding when something changes on the way
-    // TODO: find the actual cause
-    [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
-    public class Patch_JobDriver_MakeNewToils_Postfix
-    {
-        private static readonly int TicksBetweenCacheChecks = 50;
-
-        public static IEnumerable<Toil> Postfix(IEnumerable<Toil> __result, JobDriver_ConstructFinishFrame __instance, Pawn ___pawn, Job ___job)
-        {
-            foreach (var t in __result)
-            {
-                if (t.defaultCompleteMode == ToilCompleteMode.PatherArrival)
-                {
-                    t.AddFailCondition(() =>
-                    {
-                        if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0 && PawnPositionCache.IsPawnStuck(t?.actor))
-                        {
-                            DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-                yield return t;
-            }
-        }
-    }
 
     // Fail during construction if the building would enclose something
     public class Patch_JobDriver_MakeNewToils
