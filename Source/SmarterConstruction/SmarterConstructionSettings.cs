@@ -1,8 +1,4 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-
-namespace SmarterConstruction
+﻿namespace SmarterConstruction
 {
     public enum SCLogLevel
     {
@@ -18,13 +14,6 @@ namespace SmarterConstruction
     {
         public readonly SCLogLevel LogLevel = SCLogLevel.Debug;
         public bool ChangeMapEdgesCompatibility { get; set; }
-        public readonly HashSet<Type> AddPriorityToWorkgivers = new HashSet<Type>
-        {
-            /*typeof(WorkGiver_ConstructDeliverResources),
-            typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
-            typeof(WorkGiver_ConstructDeliverResourcesToFrames),*/
-            typeof(WorkGiver_ConstructFinishFrames)
-        };
         public readonly int FinishEncloseThingCacheTicks = 6;
         public readonly int GetJobEncloseThingCacheTicks = 20;
         public readonly int MaxRegionSize = 50;

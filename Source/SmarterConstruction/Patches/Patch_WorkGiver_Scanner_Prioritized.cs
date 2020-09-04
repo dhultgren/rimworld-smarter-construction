@@ -1,19 +1,29 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace SmarterConstruction.Patches
 {
-    // Tell Rimworld that construction work givers should look at priority
+    // Tell Rimworld that WorkGiver_ConstructFinishFrames should look at priority
     [HarmonyPatch(typeof(WorkGiver_Scanner))]
     [HarmonyPatch("Prioritized", MethodType.Getter)]
     public class Patch_WorkGiver_Scanner_Prioritized
     {
-        public static bool Prefix(WorkGiver_Scanner __instance, ref bool __result)
+        public static List<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
-            if (!SmarterConstruction.Settings.AddPriorityToWorkgivers.Contains(__instance.GetType())) return true;
-
-            __result = true;
-            return false;
+            var retTrue = generator.DefineLabel();
+            var ret = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Isinst, typeof(WorkGiver_ConstructFinishFrames)),
+                new CodeInstruction(OpCodes.Brtrue, retTrue),
+                new CodeInstruction(OpCodes.Ldc_I4_0),
+                new CodeInstruction(OpCodes.Ret),
+                new CodeInstruction(OpCodes.Ldc_I4_1).WithLabels(retTrue),
+                new CodeInstruction(OpCodes.Ret)
+            };
+            return ret;
         }
     }
 }
