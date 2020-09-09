@@ -13,7 +13,6 @@
     public class SmarterConstructionSettings
     {
         public readonly SCLogLevel LogLevel = SCLogLevel.Debug;
-        public bool ChangeMapEdgesCompatibility { get; set; }
         public readonly int FinishEncloseThingCacheTicks = 6;
         public readonly int GetJobEncloseThingCacheTicks = 20;
         public readonly int MaxRegionSize = 50;

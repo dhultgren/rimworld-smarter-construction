@@ -7,11 +7,7 @@ namespace SmarterConstruction
     {
         public static void InitCompatibility()
         {
-            if (LoadedModManager.RunningModsListForReading.Any(m => m.PackageId == "kapitanoczywisty.changemapedge"))
-            {
-                SmarterConstruction.Settings.ChangeMapEdgesCompatibility = true;
-                DebugUtils.InfoLog("Activating Change map edge limit compatibility mode");
-            }
+
         }
     }
 }

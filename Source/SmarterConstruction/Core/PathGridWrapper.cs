@@ -18,9 +18,7 @@ namespace SmarterConstruction.Core
 
         public bool Walkable(IntVec3 loc)
         {
-            return SmarterConstruction.Settings.ChangeMapEdgesCompatibility
-                ? _pathGrid.Walkable(loc)
-                : _pathGrid.WalkableFast(loc);
+            return _pathGrid.Walkable(loc);
         }
     }
 }
