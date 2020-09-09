@@ -10,7 +10,7 @@ namespace SmarterConstruction.Patches
     [HarmonyPatch(typeof(WorkGiver_ConstructFinishFrames), "JobOnThing")]
     public class WorkGiver_ConstructFinishFrames_JobOnThing
     {
-        private static readonly int MaxJobsPerTick = 10;
+        private static readonly int ThrottleJobsAfter = 20;
         private static int currentTick = 0;
         private static int thingsUpdatedThisTick = 0;
 
@@ -26,7 +26,7 @@ namespace SmarterConstruction.Patches
 
                 // Minimize stuttering by throttling checks if there are too many each tick
                 // Will still run the detection code if there isn't any cached data available, otherwise it could cause a job loop
-                var maxCacheLength = thingsUpdatedThisTick < ThrottleJobsAfter ? SmarterConstruction.Settings.GetJobEncloseThingCacheTicks : SmarterConstruction.Settings.GetJobThrottleCacheTicks;
+                var maxCacheLength = thingsUpdatedThisTick < ThrottleJobsAfter ? SmarterConstruction.Settings.GetJobCacheTicks : SmarterConstruction.Settings.GetJobThrottleCacheTicks;
                 var encloseData = ClosedRegionDetector.WouldEncloseThings(t, pawn, maxCacheLength);
 
                 if (encloseData.EnclosesSelf)

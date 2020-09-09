@@ -7,7 +7,7 @@ namespace SmarterConstruction.Core
 {
     public static class ClosedRegionDetector
     {
-        private static readonly int TicksBetweenLogs = 300;
+        private static readonly int TicksBetweenLogs = 100;
 
         private static readonly EncloseThingsCache cache = new EncloseThingsCache();
         private static int lastLogTick = 0;
