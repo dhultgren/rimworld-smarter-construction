@@ -15,6 +15,7 @@
         public readonly SCLogLevel LogLevel = SCLogLevel.Debug;
         public readonly int FinishEncloseThingCacheTicks = 6;
         public readonly int GetJobEncloseThingCacheTicks = 20;
+        public readonly int GetJobThrottleCacheTicks = 600;
         public readonly int MaxRegionSize = 50;
     }
 }

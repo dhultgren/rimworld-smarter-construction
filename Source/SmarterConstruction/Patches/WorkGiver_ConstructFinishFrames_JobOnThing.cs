@@ -24,9 +24,9 @@ namespace SmarterConstruction.Patches
                     thingsUpdatedThisTick = 0;
                 }
 
-                // Minimize stuttering by only updating at most MaxJobsPerTick cached data points every tick
+                // Minimize stuttering by throttling checks if there are too many each tick
                 // Will still run the detection code if there isn't any cached data available, otherwise it could cause a job loop
-                var maxCacheLength = thingsUpdatedThisTick < MaxJobsPerTick ? SmarterConstruction.Settings.GetJobEncloseThingCacheTicks : 100000;
+                var maxCacheLength = thingsUpdatedThisTick < ThrottleJobsAfter ? SmarterConstruction.Settings.GetJobEncloseThingCacheTicks : SmarterConstruction.Settings.GetJobThrottleCacheTicks;
                 var encloseData = ClosedRegionDetector.WouldEncloseThings(t, pawn, maxCacheLength);
 
                 if (encloseData.EnclosesSelf)
