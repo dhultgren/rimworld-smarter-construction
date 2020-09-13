@@ -11,18 +11,25 @@ namespace SmarterConstruction.Patches
     [HarmonyPatch(typeof(WorkGiver_Scanner), "GetPriority", new Type[] { typeof(Pawn), typeof(TargetInfo) })]
     public class Patch_WorkGiver_Scanner_GetPriority
     {
-        private static readonly int MaxDistanceForPriority = 10;
-        private static readonly int MaxCacheTime = 2000;
+        private static readonly int MaxDistanceForPriority = 15;
+        private static readonly int MaxCacheTime = 3000;
 
         private static readonly Dictionary<IntVec3, CachedPriority> cache = new Dictionary<IntVec3, CachedPriority>();
+        private static readonly Random random = new Random();
 
         [HarmonyPostfix]
         public static void PriorityPostfix(Pawn pawn, TargetInfo t, ref float __result, WorkGiver_Scanner __instance)
         {
+            if (__result < 0) return;
+            if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
+            if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
+            if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
+
             if (cache.TryGetValue(t.Cell, out CachedPriority data))
             {
-                if (data.CachedAtTick + MaxCacheTime < Find.TickManager.TicksGame)
+                if (data.ExpiresAtTick < Find.TickManager.TicksGame)
                 {
+                    //DebugUtils.DebugLog("Expiring cached priority for " + t.Cell);
                     cache.Remove(t.Cell);
                 }
                 else
@@ -31,15 +38,11 @@ namespace SmarterConstruction.Patches
                     return;
                 }
             }
-            if (__result < 0) return;
-            if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
-            if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
-            if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
 
             int modPriority = NeighborCounter.CountImpassableNeighbors(t.Thing);
             cache[t.Cell] = new CachedPriority
             {
-                CachedAtTick = Find.TickManager.TicksGame,
+                ExpiresAtTick = Find.TickManager.TicksGame + MaxCacheTime + random.Next(-MaxCacheTime/10, MaxCacheTime/10),
                 PriorityModifier = modPriority
             };
 
@@ -55,7 +58,7 @@ namespace SmarterConstruction.Patches
         private class CachedPriority
         {
             public int PriorityModifier { get; set; }
-            public int CachedAtTick { get; set; }
+            public int ExpiresAtTick { get; set; }
         }
     }
 }
