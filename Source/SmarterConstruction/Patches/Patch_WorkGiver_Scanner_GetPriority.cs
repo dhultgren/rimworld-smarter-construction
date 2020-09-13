@@ -33,7 +33,6 @@ namespace SmarterConstruction.Patches
             }
             if (__result < 0) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
-            if (pawn?.Faction?.IsPlayer != true) return;
             if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
             if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
 
