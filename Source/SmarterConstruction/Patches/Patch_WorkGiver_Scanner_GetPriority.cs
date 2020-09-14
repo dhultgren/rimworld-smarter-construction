@@ -23,7 +23,7 @@ namespace SmarterConstruction.Patches
             if (__result < 0) return;
             if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
-            if (!pawn.Position.IsValid || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
+            if (!pawn?.Position.IsValid == true || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
 
             if (cache.TryGetValue(t.Cell, out CachedPriority data))
             {
