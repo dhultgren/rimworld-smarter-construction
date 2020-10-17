@@ -10,7 +10,7 @@ namespace SmarterConstruction.Patches
     // Hack to stop pawns from getting stuck in the pathfinding when something changes on the way
     // TODO: find the actual cause
     [HarmonyPatch(typeof(JobDriver_ConstructFinishFrame), "MakeNewToils")]
-    public class Patch_JobDriver_MakeNewToils2
+    public class Patch_PawnsGettingStuck
     {
         private static readonly int TicksBetweenCacheChecks = 50;
 
