@@ -11,7 +11,6 @@ namespace SmarterConstruction.Patches
     [HarmonyPatch(typeof(WorkGiver_Scanner), "GetPriority", new Type[] { typeof(Pawn), typeof(TargetInfo) })]
     public class Patch_WorkGiver_Scanner_GetPriority
     {
-        private static readonly int MaxDistanceForPriority = 15;
         private static readonly int MaxCacheTime = 3000;
 
         private static readonly Dictionary<IntVec3, CachedPriority> cache = new Dictionary<IntVec3, CachedPriority>();
@@ -23,7 +22,7 @@ namespace SmarterConstruction.Patches
             if (__result < 0) return;
             if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
-            if (!pawn?.Position.IsValid == true || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > MaxDistanceForPriority) return;
+            if (!pawn?.Position.IsValid == true || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > SmarterConstruction.Settings.MaxDistanceForPriority) return;
             if (pawn.Map != null && !t.Cell.Walkable(pawn.Map)) return; // Replacing existing structure
 
             if (cache.TryGetValue(t.Cell, out CachedPriority data))
