@@ -21,7 +21,7 @@ namespace SmarterConstruction.Core
                 lastLogTick = Find.TickManager.TicksGame;
                 DebugUtils.DebugLog($"Cache hits {100 * totalCacheHits / (float)(totalChecks + totalCacheHits):F0}%");
             }*/
-            if (target?.Position == null || target?.Map?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
+            if (target?.Position == null || target?.Map?.pathing?.Normal?.pathGrid == null || target?.def == null) return new EncloseThingsResult();
 
             var cachedResult = cache.GetIfAvailable(target, maxCacheLength);
             if (cachedResult != null)
@@ -33,7 +33,7 @@ namespace SmarterConstruction.Core
             //totalChecks++;
             var retValue = new EncloseThingsResult();
             var blockedPositions = GenAdj.CellsOccupiedBy(target.Position, target.Rotation, target.def.Size).ToHashSet();
-            var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathGrid), blockedPositions);
+            var closedRegion = ClosedRegionCreatedByAddingImpassable(new PathGridWrapper(target.Map.pathing.Normal.pathGrid), blockedPositions);
             if (closedRegion.Count > 0)
             {
                 var enclosedThings = closedRegion.SelectMany(p => p.GetThingList(target.Map)).ToList();
