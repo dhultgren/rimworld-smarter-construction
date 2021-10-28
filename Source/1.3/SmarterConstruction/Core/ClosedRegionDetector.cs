@@ -70,8 +70,10 @@ namespace SmarterConstruction.Core
             var region = new HashSet<IntVec3>();
             if (!pathGrid.Walkable(start))
             {
-                if(NeighborCounter.GetCardinalNeighbors(start).All(p => addedBlockers.Contains(p) || !pathGrid.Walkable(p)))
-                    region.Add(start);//Treat a blocked-off unwalkable adjacent cell as its own region, just to check it
+                if (NeighborCounter.GetCardinalNeighbors(start).All(p => addedBlockers.Contains(p) || !pathGrid.Walkable(p)))
+                {
+                    region.Add(start); // Treat a blocked-off unwalkable adjacent cell as its own region, just to check it
+                }
                 return region;
             }
             var queuedPositions = new Queue<IntVec3>();
