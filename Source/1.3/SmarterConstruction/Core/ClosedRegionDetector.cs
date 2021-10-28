@@ -68,8 +68,12 @@ namespace SmarterConstruction.Core
         private static HashSet<IntVec3> FloodFill(IPathGrid pathGrid, IntVec3 start, HashSet<IntVec3> addedBlockers)
         {
             var region = new HashSet<IntVec3>();
-            if (!pathGrid.Walkable(start)) return region;
-
+            if (!pathGrid.Walkable(start))
+            {
+                if(NeighborCounter.GetCardinalNeighbors(start).All(p => addedBlockers.Contains(p) || !pathGrid.Walkable(p)))
+                    region.Add(start);//Treat a blocked-off unwalkable adjacent cell as its own region, just to check it
+                return region;
+            }
             var queuedPositions = new Queue<IntVec3>();
             queuedPositions.Enqueue(start);
             while (queuedPositions.Count > 0)
