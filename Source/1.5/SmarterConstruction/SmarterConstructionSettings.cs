@@ -16,7 +16,7 @@
         public readonly int FinishCacheTicks = 0;
         public readonly int GetJobCacheTicks = 20;
         public readonly int GetJobThrottleCacheTicks = 600;
-        public readonly int MaxRegionSize = 50;
+        public readonly int MaxRegionSize = 100;
         public readonly int MaxDistanceForPriority = 15;
     }
 }
