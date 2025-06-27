@@ -57,34 +57,60 @@ namespace SmarterConstruction.Patches
 
     public class CustomGenClosest
     {
-        public static Thing ClosestThing_Global_Reachable_Custom(IntVec3 center, Map map, IEnumerable<Thing> searchSet, PathEndMode peMode, TraverseParms traverseParams, float maxDistance, Predicate<Thing> validator = null, Func<Thing, float> priorityGetter = null, bool canLookInHaulableSources = false)
+        public static Thing ClosestThing_Global_Reachable_Custom(
+            IntVec3 center,
+            Map map,
+            IEnumerable<Thing> searchSet,
+            PathEndMode peMode,
+            TraverseParms traverseParams,
+            float maxDistance,
+            Predicate<Thing> validator = null,
+            Func<Thing, float> priorityGetter = null,
+            bool canLookInHaulableSources = false)
         {
             if (searchSet == null) return null;
-            var bestPrio = float.MinValue;
+
             var maxPriorityDistanceSquared = SmarterConstruction.Settings.MaxDistanceForPriority * SmarterConstruction.Settings.MaxDistanceForPriority;
-            var closestDistSquared = float.MaxValue;
-            Thing bestThing = null;
-            foreach (Thing t in searchSet)
-            {
-                var dist = (center - t.Position).LengthHorizontalSquared;
-                var hasPriority = dist <= maxPriorityDistanceSquared
-                    && priorityGetter != null
-                    && t?.def?.entityDefToBuild?.passability == Traversability.Impassable;
-                if ((hasPriority || dist < closestDistSquared)
-                    && map.reachability.CanReach(center, t, peMode, traverseParams))
+            var maxDistanceSquared = maxDistance > 0f ? maxDistance * maxDistance : float.MaxValue;
+
+            // Pre-filter and project to avoid repeated calculations
+            var candidates = searchSet
+                .Where(t => t != null && (validator == null || validator(t)))
+                .Select(t =>
                 {
-                    var priority = priorityGetter == null ? 0f : priorityGetter(t);
-                    if ((priority > bestPrio || (priority == bestPrio && dist < closestDistSquared))
-                        && (validator == null || validator(t)))
+                    var dist = (center - t.Position).LengthHorizontalSquared;
+                    var hasPriority = dist <= maxPriorityDistanceSquared
+                        && priorityGetter != null
+                        && t.def?.entityDefToBuild?.passability == Traversability.Impassable;
+                    var priority = priorityGetter != null ? priorityGetter(t) : 0f;
+                    return new
                     {
-                        closestDistSquared = dist;
-                        bestPrio = priority;
-                        bestThing = t;
-                    }
+                        Thing = t,
+                        DistanceSquared = dist,
+                        HasPriority = hasPriority,
+                        Priority = priority
+                    };
+                })
+                .Where(t => t.DistanceSquared <= maxDistanceSquared);
+
+            // Order by priority (descending), then by distance (ascending)
+            var ordered = candidates
+                .OrderByDescending(x => x.HasPriority)
+                .ThenByDescending(x => x.Priority)
+                .ThenBy(x => x.DistanceSquared);
+
+            // Lazily evaluate reachability
+            foreach (var candidate in ordered)
+            {
+                if (map.reachability.CanReach(center, candidate.Thing, peMode, traverseParams))
+                {
+                    DebugUtils.VerboseLog($"CustomGenClosest.ClosestThing_Global_Reachable_Custom returning {candidate.Thing.Label ?? "null"} with priority {candidate.Priority} and distance {Math.Sqrt(candidate.DistanceSquared)}");
+                    return candidate.Thing;
                 }
             }
-            DebugUtils.VerboseLog($"CustomGenClosest.ClosestThing_Global_Reachable_Custom returning {bestThing?.Label ?? "null"} with priority {bestPrio} and distance {Math.Sqrt(closestDistSquared)}");
-            return bestThing;
+
+            DebugUtils.VerboseLog("CustomGenClosest.ClosestThing_Global_Reachable_Custom returning null (no reachable candidates)");
+            return null;
         }
     }
 }
