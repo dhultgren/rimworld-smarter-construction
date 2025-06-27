@@ -24,7 +24,7 @@ namespace SmarterConstruction.Patches
                     {
                         if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0 && PawnPositionCache.IsPawnStuck(t?.actor))
                         {
-                            //DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
+                            DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
                             return true;
                         }
                         return false;

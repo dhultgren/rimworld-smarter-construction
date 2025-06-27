@@ -29,7 +29,7 @@ namespace SmarterConstruction.Patches
             {
                 if (data.ExpiresAtTick < Find.TickManager.TicksGame)
                 {
-                    //DebugUtils.DebugLog("Expiring cached priority for " + t.Cell);
+                    DebugUtils.DebugLog("Expiring cached priority for " + t.Cell);
                     cache.Remove(t.Cell);
                 }
                 else

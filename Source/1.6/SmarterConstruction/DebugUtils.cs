@@ -4,27 +4,15 @@ namespace SmarterConstruction
 {
     public class DebugUtils
     {
-        public static void InfoLog(string text)
-        {
-            if (SmarterConstruction.Settings.LogLevel >= SCLogLevel.Info)
-            {
-                Log.Message(FormatLog(text));
-            }
-        }
+        public static void ErrorLog(string text) => LogMessage(FormatLog(text), SCLogLevel.Error);
+        public static void InfoLog(string text) => LogMessage(FormatLog(text), SCLogLevel.Info);
+        public static void DebugLog(string text) => LogMessage(FormatLog(text), SCLogLevel.Debug);
+        public static void VerboseLog(string text) => LogMessage(FormatLogWithTicks(text), SCLogLevel.Verbose);
 
-        public static void DebugLog(string text)
+        private static void LogMessage(string text, SCLogLevel level)
         {
-            if (SmarterConstruction.Settings.LogLevel >= SCLogLevel.Debug)
-            {
-                Log.Message(FormatLog(text));
-            }
-        }
-
-        public static void VerboseLog(string text)
-        {
-            if (SmarterConstruction.Settings.LogLevel >= SCLogLevel.Verbose)
-            {
-                Log.Message(FormatLogWithTicks(text));
+            if (SmarterConstruction.Settings.LogLevel >= level) {
+                Log.Message(text);
             }
         }
 
