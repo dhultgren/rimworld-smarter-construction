@@ -11,38 +11,50 @@ using Verse.AI;
 namespace SmarterConstruction.Patches
 {
     // Fail during construction if the building would enclose something
+    [HarmonyPatch]
     public class Patch_JobDriver_MakeNewToils
     {
-        public static void Patch(Harmony harmony)
+        static MethodBase TargetMethod()
         {
-            var nestedTypes = typeof(JobDriver_ConstructFinishFrame).GetNestedTypes(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
-            var targetType = nestedTypes.FirstOrDefault(t => t.Name == "<>c__DisplayClass6_0");
-            var targetMethod = targetType.GetRuntimeMethods().FirstOrDefault(m => m.Name == "<MakeNewToils>b__1");
-            harmony.Patch(targetMethod, transpiler: new HarmonyMethod(typeof(Patch_JobDriver_MakeNewToils), nameof(Transpiler)));
+            var targetType = typeof(JobDriver_ConstructFinishFrame)
+                .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                .FirstOrDefault(t => t.Name.Contains("DisplayClass8_0"));
+            var targetMethod = targetType.GetMethod("<MakeNewToils>b__1", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            return targetMethod;
         }
 
         static List<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             var completeConstructionCall = typeof(Frame).GetMethod("CompleteConstruction");
             var testEncloseCall = typeof(TranspilerHelper).GetMethod(nameof(TranspilerHelper.EndJobIfEnclosing));
+            var readyForNextToilCall = typeof(JobDriver).GetMethod(nameof(JobDriver.ReadyForNextToil));
             var workDoneField = typeof(Frame).GetField(nameof(Frame.workDone));
             var instructionList = instructions.ToList();
 
-            var insertionIndex = instructionList.FirstIndexOf(instruction => instruction.opcode == OpCodes.Callvirt && instruction.Calls(completeConstructionCall)) - 2;
-            var retInstruction = instructionList
+            var completeConstructionIndex = instructionList.FindIndex(instruction =>
+                instruction.opcode == OpCodes.Callvirt && instruction.Calls(completeConstructionCall));
+            var insertionIndex = completeConstructionIndex - 2;
+            var readyForNextToilInstruction = instructionList
                 .Skip(insertionIndex)
-                .First(instruction => instruction.opcode == OpCodes.Ret && instruction.labels.Count > 0);
+                .First(instruction =>
+                    (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt) &&
+                    instruction.operand is MethodInfo mi &&
+                    mi.Name == "ReadyForNextToil");
+            var readyForNextToilLabel = generator.DefineLabel();
+            readyForNextToilInstruction.labels.Add(readyForNextToilLabel);
 
             instructionList.InsertRange(insertionIndex, new[] {
-                new CodeInstruction(OpCodes.Ldloc_1),                         // Set workDone = workToBuild to avoid graphic glitch
-                new CodeInstruction(OpCodes.Ldloc_3),                         //
-                new CodeInstruction(OpCodes.Stfld, workDoneField),            //
+                new CodeInstruction(OpCodes.Ldloc_1),                               // Set workDone = workToBuild to avoid graphic glitch
+                new CodeInstruction(OpCodes.Ldloc_3),                               //
+                new CodeInstruction(OpCodes.Stfld, workDoneField),                  //
 
-                new CodeInstruction(OpCodes.Ldloc_1),                         // Skip CompleteConstruction if the building would enclose something
-                new CodeInstruction(OpCodes.Ldloc_0),                         //
-                new CodeInstruction(OpCodes.Call, testEncloseCall),           //
-                new CodeInstruction(OpCodes.Brtrue, retInstruction.labels[0]) //
+                new CodeInstruction(OpCodes.Ldloc_1),                               // If EndJobIfEnclosing returns true, skip to ReadyForNextToil
+                new CodeInstruction(OpCodes.Ldloc_0),                               //
+                new CodeInstruction(OpCodes.Call, testEncloseCall),                 //
+                new CodeInstruction(OpCodes.Brtrue, readyForNextToilLabel)          //
             });
+
             return instructionList;
         }
     }

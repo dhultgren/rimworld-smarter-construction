@@ -17,7 +17,6 @@ namespace SmarterConstruction
 
             var harmony = new Harmony("SmarterConstruction");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Patch_JobDriver_MakeNewToils.Patch(harmony);
         }
     }
 }
