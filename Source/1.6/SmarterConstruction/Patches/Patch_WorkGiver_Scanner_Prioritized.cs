@@ -57,7 +57,7 @@ namespace SmarterConstruction.Patches
 
     public class CustomGenClosest
     {
-        public static Thing ClosestThing_Global_Reachable_Custom(IntVec3 center, Map map, IEnumerable<Thing> searchSet, PathEndMode peMode, TraverseParms traverseParams, float maxDistance, Predicate<Thing> validator = null, Func<Thing, float> priorityGetter = null)
+        public static Thing ClosestThing_Global_Reachable_Custom(IntVec3 center, Map map, IEnumerable<Thing> searchSet, PathEndMode peMode, TraverseParms traverseParams, float maxDistance, Predicate<Thing> validator = null, Func<Thing, float> priorityGetter = null, bool canLookInHaulableSources = false)
         {
             if (searchSet == null) return null;
             var bestPrio = float.MinValue;
@@ -83,6 +83,7 @@ namespace SmarterConstruction.Patches
                     }
                 }
             }
+            DebugUtils.VerboseLog($"CustomGenClosest.ClosestThing_Global_Reachable_Custom returning {bestThing?.Label ?? "null"} with priority {bestPrio} and distance {Math.Sqrt(closestDistSquared)}");
             return bestThing;
         }
     }
