@@ -14,7 +14,7 @@ namespace SmarterConstruction.Core
 
         public static bool IsPawnStuck(Pawn pawn)
         {
-            if (pawn?.Position == null) return false;
+            if (!SmarterConstruction.Settings.EnableCaching || pawn?.Position == null) return false;
             CleanCache();
 
             if (positionCache.ContainsKey(pawn))

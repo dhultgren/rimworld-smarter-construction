@@ -25,7 +25,7 @@ namespace SmarterConstruction.Patches
             if (!pawn?.Position.IsValid == true || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > SmarterConstruction.Settings.MaxDistanceForPriority) return;
             if (pawn.Map != null && !t.Cell.Walkable(pawn.Map)) return; // Replacing existing structure
 
-            if (cache.TryGetValue(t.Cell, out CachedPriority data))
+            if (SmarterConstruction.Settings.EnableCaching && cache.TryGetValue(t.Cell, out CachedPriority data))
             {
                 if (data.ExpiresAtTick < Find.TickManager.TicksGame)
                 {
@@ -40,11 +40,14 @@ namespace SmarterConstruction.Patches
             }
 
             int modPriority = NeighborCounter.CountImpassableNeighbors(t.Thing);
-            cache[t.Cell] = new CachedPriority
+            if (SmarterConstruction.Settings.EnableCaching)
             {
-                ExpiresAtTick = Find.TickManager.TicksGame + MaxCacheTime + random.Next(-MaxCacheTime/10, MaxCacheTime/10),
-                PriorityModifier = modPriority
-            };
+                cache[t.Cell] = new CachedPriority
+                {
+                    ExpiresAtTick = Find.TickManager.TicksGame + MaxCacheTime + random.Next(-MaxCacheTime / 10, MaxCacheTime / 10),
+                    PriorityModifier = modPriority
+                };
+            }
 
             __result += modPriority;
         }

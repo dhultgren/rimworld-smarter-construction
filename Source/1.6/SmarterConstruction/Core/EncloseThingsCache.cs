@@ -9,7 +9,7 @@ namespace SmarterConstruction.Core
 
         public EncloseThingsResult GetIfAvailable(Thing target, int maxCacheLength)
         {
-            if (cache.TryGetValue(target, out var cachedResult))
+            if (SmarterConstruction.Settings.EnableCaching && cache.TryGetValue(target, out var cachedResult))
             {
                 if (cachedResult.CachedAtTick + maxCacheLength > Find.TickManager.TicksGame)
                 {
@@ -22,6 +22,7 @@ namespace SmarterConstruction.Core
 
         public void Add(Thing target, EncloseThingsResult result)
         {
+            if (!SmarterConstruction.Settings.EnableCaching) return;
             cache[target] = new CachedEncloseThingsResult
             {
                 EncloseThingsResult = result,
