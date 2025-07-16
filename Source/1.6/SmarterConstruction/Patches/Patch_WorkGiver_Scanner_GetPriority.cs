@@ -23,7 +23,7 @@ namespace SmarterConstruction.Patches
             if (!(__instance is WorkGiver_ConstructFinishFrames)) return;
             if (t.Thing?.def?.entityDefToBuild?.passability != Traversability.Impassable) return;
             if (!pawn?.Position.IsValid == true || !t.Cell.IsValid || pawn.Position.DistanceTo(t.Cell) > SmarterConstruction.Settings.MaxDistanceForPriority) return;
-            if (pawn.Map != null && !t.Cell.Walkable(pawn.Map)) return; // Replacing existing structure
+            if (pawn.Map != null && !pawn.Map.GetComponent<WalkabilityHandler>().Walkable(t.Cell)) return; // Replacing existing structure
 
             if (SmarterConstruction.Settings.EnableCaching && cache.TryGetValue(t.Cell, out CachedPriority data))
             {

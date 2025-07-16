@@ -4,43 +4,53 @@ using Verse;
 
 namespace SmarterConstruction.Core
 {
-    class PawnPositionCache
+    public class PawnPositionCache : MapComponent
     {
-        private static readonly int PawnStuckAfter = 300;
-        private static readonly int CacheCleanupFrequency = 2000;
+        private const int PawnStuckAfter = 300;
+        private const int CacheCleanupFrequency = 2000;
 
-        private static readonly Dictionary<Pawn, Tuple<IntVec3, int>> positionCache = new Dictionary<Pawn, Tuple<IntVec3, int>>();
-        private static int lastCacheCleanup = Find.TickManager.TicksGame;
+        private Dictionary<Pawn, Tuple<IntVec3, int>> _positionCache = new Dictionary<Pawn, Tuple<IntVec3, int>>();
+        private int _lastCacheCleanup;
 
-        public static bool IsPawnStuck(Pawn pawn)
+        public PawnPositionCache(Map map) : base(map)
+        {
+            _lastCacheCleanup = Find.TickManager.TicksGame;
+        }
+
+        public bool IsPawnStuck(Pawn pawn)
         {
             if (!SmarterConstruction.Settings.EnableCaching || pawn?.Position == null) return false;
             CleanCache();
 
-            if (positionCache.ContainsKey(pawn))
+            if (_positionCache.ContainsKey(pawn))
             {
-                var data = positionCache[pawn];
+                var data = _positionCache[pawn];
                 if (data.Item1 == pawn.Position)
                 {
                     if (data.Item2 <= Find.TickManager.TicksGame)
                     {
-                        positionCache.Remove(pawn);
+                        _positionCache.Remove(pawn);
                         return true;
                     }
                     return false;
                 }
             }
-            positionCache[pawn] = new Tuple<IntVec3, int>(pawn.Position, Find.TickManager.TicksGame + PawnStuckAfter);
+            _positionCache[pawn] = new Tuple<IntVec3, int>(pawn.Position, Find.TickManager.TicksGame + PawnStuckAfter);
             return false;
         }
 
-        private static void CleanCache()
+        private void CleanCache()
         {
-            if (lastCacheCleanup + CacheCleanupFrequency < Find.TickManager.TicksGame)
+            if (_lastCacheCleanup + CacheCleanupFrequency < Find.TickManager.TicksGame)
             {
-                positionCache.RemoveAll(d => d.Value.Item2 + CacheCleanupFrequency < Find.TickManager.TicksGame);
-                lastCacheCleanup = Find.TickManager.TicksGame;
+                _positionCache.RemoveAll(d => d.Value.Item2 + CacheCleanupFrequency < Find.TickManager.TicksGame);
+                _lastCacheCleanup = Find.TickManager.TicksGame;
             }
+        }
+
+        public static PawnPositionCache GetCache(Map map)
+        {
+            return map.GetComponent<PawnPositionCache>();
         }
     }
 }

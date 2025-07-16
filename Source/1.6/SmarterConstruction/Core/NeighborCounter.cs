@@ -10,7 +10,8 @@ namespace SmarterConstruction.Core
         {
             var thingCells = GenAdj.CellsOccupiedBy(thing.Position, thing.Rotation, thing.def.Size).ToHashSet();
             var possiblePositions = GetAllNeighbors(thingCells);
-            return possiblePositions.Count(pos => thing?.Map?.pathing?.Normal?.pathGrid?.Walkable(pos) != true);
+            var walkabilityHandler = thing?.Map?.GetComponent<WalkabilityHandler>();
+            return possiblePositions.Count(pos => walkabilityHandler?.Walkable(pos) != true);
         }
 
         public static HashSet<IntVec3> GetAllNeighbors(HashSet<IntVec3> blockers)

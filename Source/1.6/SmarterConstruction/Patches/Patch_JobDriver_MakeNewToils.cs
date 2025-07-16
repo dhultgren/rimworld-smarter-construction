@@ -75,7 +75,7 @@ namespace SmarterConstruction.Patches
             if (pawnsAtLocation.Count > 0 && wouldEnclose.EnclosesRegion)
             {
                 // move pawn to a safe location to avoid random movement
-                var safePositions = ClosedRegionDetector.FindSafeConstructionSpots(new PathGridWrapper(target.Map.pathing.Normal.pathGrid), target);
+                var safePositions = ClosedRegionDetector.FindSafeConstructionSpots(target);
                 if (safePositions.Count == 0)
                 {
                     pawn.jobs.EndCurrentJob(JobCondition.Incompletable);

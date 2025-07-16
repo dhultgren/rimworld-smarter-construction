@@ -4,6 +4,7 @@ using SmarterConstruction.Core;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
+using Verse.Noise;
 
 namespace SmarterConstruction.Patches
 {
@@ -22,10 +23,15 @@ namespace SmarterConstruction.Patches
                 {
                     t.AddFailCondition(() =>
                     {
-                        if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0 && PawnPositionCache.IsPawnStuck(t?.actor))
+                        if (Find.TickManager.TicksGame % TicksBetweenCacheChecks == 0)
                         {
-                            DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
-                            return true;
+                            var pawn = t?.actor;
+                            var map = pawn?.Map;
+                            if (PawnPositionCache.GetCache(map)?.IsPawnStuck(pawn) == true)
+                            {
+                                DebugUtils.DebugLog("Failing goto toil because it has taken too long, pawn " + ___pawn.Label + ". If this was wrong, please report it!");
+                                return true;
+                            }
                         }
                         return false;
                     });

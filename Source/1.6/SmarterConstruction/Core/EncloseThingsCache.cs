@@ -3,19 +3,24 @@ using Verse;
 
 namespace SmarterConstruction.Core
 {
-    class EncloseThingsCache
+    public class EncloseThingsCache : MapComponent
     {
-        private readonly Dictionary<Thing, CachedEncloseThingsResult> cache = new Dictionary<Thing, CachedEncloseThingsResult>();
+        private readonly Dictionary<Thing, CachedEncloseThingsResult> _cache = new Dictionary<Thing, CachedEncloseThingsResult>();
+
+        public EncloseThingsCache(Map map) : base(map)
+        {
+        }
 
         public EncloseThingsResult GetIfAvailable(Thing target, int maxCacheLength)
         {
-            if (SmarterConstruction.Settings.EnableCaching && cache.TryGetValue(target, out var cachedResult))
+            if (SmarterConstruction.Settings.EnableCaching && _cache.TryGetValue(target, out var cachedResult))
             {
                 if (cachedResult.CachedAtTick + maxCacheLength > Find.TickManager.TicksGame)
                 {
+                    if (maxCacheLength == 0) DebugUtils.ErrorLog($"Cache length is 0 for {target.Label} at {target.Position}. This should not happen.");
                     return cachedResult.EncloseThingsResult;
                 }
-                cache.Remove(target);
+                _cache.Remove(target);
             }
             return null;
         }
@@ -23,11 +28,16 @@ namespace SmarterConstruction.Core
         public void Add(Thing target, EncloseThingsResult result)
         {
             if (!SmarterConstruction.Settings.EnableCaching) return;
-            cache[target] = new CachedEncloseThingsResult
+            _cache[target] = new CachedEncloseThingsResult
             {
                 EncloseThingsResult = result,
                 CachedAtTick = Find.TickManager.TicksGame
             };
+        }
+
+        public static EncloseThingsCache GetCache(Map map)
+        {
+            return map.GetComponent<EncloseThingsCache>();
         }
 
         private class CachedEncloseThingsResult

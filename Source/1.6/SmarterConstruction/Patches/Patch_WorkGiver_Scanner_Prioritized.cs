@@ -104,12 +104,12 @@ namespace SmarterConstruction.Patches
             {
                 if (map.reachability.CanReach(center, candidate.Thing, peMode, traverseParams))
                 {
-                    DebugUtils.VerboseLog($"CustomGenClosest.ClosestThing_Global_Reachable_Custom returning {candidate.Thing.Label ?? "null"} with priority {candidate.Priority} and distance {Math.Sqrt(candidate.DistanceSquared)}");
+                    //DebugUtils.VerboseLog($"CustomGenClosest.ClosestThing_Global_Reachable_Custom returning {candidate.Thing.Label ?? "null"} with priority {candidate.Priority} and distance {Math.Sqrt(candidate.DistanceSquared)}");
                     return candidate.Thing;
                 }
             }
 
-            DebugUtils.VerboseLog("CustomGenClosest.ClosestThing_Global_Reachable_Custom returning null (no reachable candidates)");
+            //DebugUtils.VerboseLog("CustomGenClosest.ClosestThing_Global_Reachable_Custom returning null (no reachable candidates)");
             return null;
         }
     }

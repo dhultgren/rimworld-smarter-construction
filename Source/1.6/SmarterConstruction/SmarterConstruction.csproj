@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Compatibility.cs" />
     <Compile Include="Core\EncloseThingsCache.cs" />
+    <Compile Include="Core\WalkabilityHandler.cs" />
     <Compile Include="DebugUtils.cs" />
     <Compile Include="Patches\Patch_JobDriver_MakeNewToils.cs" />
     <Compile Include="Patches\Patch_PawnsGettingStuck.cs" />
@@ -68,7 +69,6 @@
     <Compile Include="Patches\WorkGiver_ConstructFinishFrames_JobOnThing.cs" />
     <Compile Include="Core\ClosedRegionDetector.cs" />
     <Compile Include="Core\NeighborCounter.cs" />
-    <Compile Include="Core\PathGridWrapper.cs" />
     <Compile Include="Core\PawnPositionCache.cs" />
     <Compile Include="SmarterConstruction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

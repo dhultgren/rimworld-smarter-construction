@@ -2,7 +2,6 @@
 using NSubstitute;
 using SmarterConstruction.Core;
 using System.Collections.Generic;
-using System.Linq;
 using Verse;
 using Xunit;
 
@@ -148,7 +147,7 @@ namespace SmarterConstructionSpec
         [Fact]
         public void FindSafeConstructionSpots_SingleBlockerAllUnwalkable()
         {
-            var mock = Substitute.For<IPathGrid>();
+            var mock = Substitute.For<IWalkabilityHandler>();
             mock.Walkable(default).ReturnsForAnyArgs(false);
 
             var result = ClosedRegionDetector.FindSafeConstructionSpots(mock, new HashSet<IntVec3> { IntVec3.Zero });
@@ -201,9 +200,9 @@ namespace SmarterConstructionSpec
             result.Should().BeEquivalentTo(expected);
         }
 
-        private IPathGrid CreateMockWithImpassableTiles(List<IntVec3> impassableTiles)
+        private IWalkabilityHandler CreateMockWithImpassableTiles(List<IntVec3> impassableTiles)
         {
-            var mock = Substitute.For<IPathGrid>();
+            var mock = Substitute.For<IWalkabilityHandler>();
             mock.Walkable(default).ReturnsForAnyArgs(true);
             foreach(var tile in impassableTiles)
             {
