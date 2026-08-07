@@ -19,20 +19,21 @@ namespace SmarterConstruction.Patches
             var targetType = typeof(JobDriver_ConstructFinishFrame)
                 .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
                 .FirstOrDefault(t => t.Name.Contains("DisplayClass8_0"));
-            var targetMethod = targetType.GetMethod("<MakeNewToils>b__1", BindingFlags.NonPublic | BindingFlags.Instance);
+            var targetMethod = targetType?.GetMethod("<MakeNewToils>b__1", BindingFlags.NonPublic | BindingFlags.Instance);
 
             return targetMethod;
         }
 
         static List<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
-            var completeConstructionCall = typeof(Frame).GetMethod("CompleteConstruction");
+            var completeConstructionCall = typeof(Frame).GetMethod(nameof(Frame.CompleteConstruction));
             var testEncloseCall = typeof(TranspilerHelper).GetMethod(nameof(TranspilerHelper.EndJobIfEnclosing));
             var workDoneField = typeof(Frame).GetField(nameof(Frame.workDone));
             var instructionList = instructions.ToList();
 
             var completeConstructionIndex = instructionList.FindIndex(instruction =>
                 instruction.opcode == OpCodes.Callvirt && instruction.Calls(completeConstructionCall));
+
             var insertionIndex = completeConstructionIndex - 2;
             var retInstruction = instructionList
                 .Skip(insertionIndex)
@@ -68,13 +69,8 @@ namespace SmarterConstruction.Patches
                 return true;
             }
 
-            var pawnsAtLocation = target.Position.GetThingList(target.Map)
-                .Where(t => t is Pawn && t.Faction != null && t.Faction.IsPlayer)
-                .ToList();
-            if (wouldEnclose.EnclosesSelf) pawnsAtLocation.Add(pawn);
-            if (pawnsAtLocation.Count > 0 && wouldEnclose.EnclosesRegion)
+            if (target.Position == pawn.Position || wouldEnclose.EnclosesSelf)
             {
-                // move pawn to a safe location to avoid random movement
                 var safePositions = ClosedRegionDetector.FindSafeConstructionSpots(target);
                 if (safePositions.Count == 0)
                 {
@@ -82,18 +78,28 @@ namespace SmarterConstruction.Patches
                     DebugUtils.DebugLog($"No safe positions found for {pawn.Label} at {target.Position}, ending job.");
                     return true;
                 }
-                else
+
+                var safePosition = safePositions.First();
+                if (!safePositions.Any(p => p == pawn.Position))
                 {
-                    var safePosition = safePositions.First();
-                    pawnsAtLocation.ForEach(p =>
-                    {
-                        DebugUtils.DebugLog($"Teleported pawn {pawn.Label} from {pawn.Position} to {safePosition}");
-                        p.Position = safePosition;
-                    });
+                    DebugUtils.DebugLog($"Stepping {pawn.Label} to safe spot {safePosition} before resuming finish on {target.Label}.");
+
+                    // 1. Queue a fresh ConstructFinishFrame job to execute after moving
+                    Job finishJobAfterMove = JobMaker.MakeJob(pawn.CurJob.def, target);
+                    pawn.jobs.jobQueue.EnqueueFirst(finishJobAfterMove);
+
+                    // 2. Create the movement job to run first
+                    Job gotoSafeJob = JobMaker.MakeJob(JobDefOf.Goto, safePosition);
+                    gotoSafeJob.ignoreForbidden = true;
+
+                    // 3. Interrupt current job to start movement immediately
+                    pawn.jobs.StartJob(gotoSafeJob, JobCondition.InterruptForced);
+
+                    return true;
                 }
             }
 
-            DebugUtils.VerboseLog($"{pawn.Label} finished {target.Label} at {target.Position}");
+            DebugUtils.VerboseLog($"{pawn.Label} finished {target.Label} at {target.Position} while standing at {pawn.Position}");
             Patch_WorkGiver_Scanner_GetPriority.RemoveNeighborCachedData(target);
             return false;
         }

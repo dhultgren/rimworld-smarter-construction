@@ -31,10 +31,10 @@ namespace SmarterConstruction.Core
                 retValue.EnclosesThings = hasEnclosedUnacceptable || enclosedPlayerPawns.Count(p => p != ___pawn) > 0;
                 retValue.EnclosesSelf = enclosedPlayerPawns.Any(p => p == ___pawn);
 
-                /*DebugUtils.VerboseLog($"Enclose check for {target.Label} at {target.Position} by pawn {___pawn.Label}: " +
+                DebugUtils.VerboseLog($"Enclose check for {target.Label} at {target.Position} by pawn {___pawn.Label}: " +
                     $"EnclosesRegion={retValue.EnclosesRegion}, EnclosesThings={retValue.EnclosesThings}, EnclosesSelf={retValue.EnclosesSelf}" +
                     $" EnclosedThingsTypes=[{string.Join(", ", enclosedThings.Select(t => t.GetType().Name))}]" +
-                    $" ClosedRegion=[{string.Join(", ", closedRegion.Select(v => v.ToString()))}]");*/
+                    $" ClosedRegion=[{string.Join(", ", closedRegion.Select(v => v.ToString()))}]");
             }
             cache.Add(target, retValue);
             return retValue;

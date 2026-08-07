@@ -31,7 +31,7 @@ namespace SmarterConstruction.Patches
 
                 if (encloseData.EnclosesSelf)
                 {
-                    DebugUtils.DebugLog($"Allowing self enclosing job on {t.Position} for pawn {pawn.Label} expecting a teleport.");
+                    DebugUtils.DebugLog($"Allowing self enclosing job on {t.Position} for pawn {pawn.Label}; pawn will walk to a safe spot before finishing.");
                 }
                 if (encloseData.EnclosesThings)
                 {
