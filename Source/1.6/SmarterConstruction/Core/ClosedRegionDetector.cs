@@ -93,7 +93,7 @@ namespace SmarterConstruction.Core
 
         public static HashSet<IntVec3> FindSafeConstructionSpots(IWalkabilityHandler walkabilityHandler, HashSet<IntVec3> addedBlockers)
         {
-            var possiblePositions = NeighborCounter.GetAllNeighbors(addedBlockers);
+            var possiblePositions = NeighborCounter.GetCardinalNeighbors(addedBlockers);
             var enclosedPositions = ClosedRegionCreatedByAddingImpassable(walkabilityHandler, addedBlockers);
             possiblePositions.RemoveWhere(pos =>
             {
